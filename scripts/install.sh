@@ -1,0 +1,332 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+# Dotfiles bootstrap and configuration deployment.
+# Package installation and Stow deployment are separate operations.
+
+MODE="dry-run"
+STOW_PACKAGE=""
+
+usage() {
+    cat <<USAGE
+Usage:
+  $0 [--dry-run | --install]
+  $0 --stow PACKAGE [--apply]
+  $0 --set-shell
+  $0 --help
+
+Options:
+  --dry-run       Preview missing required packages (default)
+  --install       Ask before installing missing required packages
+  --stow PACKAGE  Preview deployment of a Stow package
+  --apply         Apply the selected Stow package (requires --stow)
+  --set-shell     Offer to change the login shell to Zsh
+  --help, -h      Show this help
+
+Examples:
+  $0
+  $0 --install
+  $0 --stow zsh
+  $0 --stow zsh --apply
+USAGE
+}
+
+APPLY_STOW=false
+SET_SHELL=false
+
+while (($#)); do
+    case "$1" in
+        --dry-run)
+            MODE="dry-run"
+            ;;
+        --install)
+            MODE="install"
+            ;;
+        --stow)
+            if (($# < 2)) || [[ -z "${2:-}" || "$2" == --* ]]; then
+                printf 'Error: --stow requires a package name.\n' >&2
+                usage >&2
+                exit 2
+            fi
+            STOW_PACKAGE="$2"
+            shift
+            ;;
+        --apply)
+            APPLY_STOW=true
+            ;;
+        --set-shell)
+            SET_SHELL=true
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            printf 'Error: unknown option: %s\n' "$1" >&2
+            usage >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
+
+if [[ -z "${BASH_VERSION:-}" ]]; then
+    printf 'Error: this installer must run under Bash.\n' >&2
+    exit 1
+fi
+
+REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Login-shell mode is deliberately separate from package installation and Stow.
+if [[ "$SET_SHELL" == true ]]; then
+    if [[ "$MODE" != "dry-run" || -n "$STOW_PACKAGE" || "$APPLY_STOW" == true ]]; then
+        printf 'Error: --set-shell cannot be combined with other actions.\n' >&2
+        exit 2
+    fi
+
+    if ! command -v zsh >/dev/null 2>&1; then
+        printf 'Error: Zsh is not installed. Run the package installer first.\n' >&2
+        exit 1
+    fi
+
+    SHELL_PATH="/usr/bin/zsh"
+
+    if [[ ! -x "$SHELL_PATH" ]] || ! grep -Fxq "$SHELL_PATH" /etc/shells; then
+        printf 'Error: %s is not an executable permitted login shell.\n' "$SHELL_PATH" >&2
+        printf 'No changes made.\n' >&2
+        exit 1
+    fi
+
+    CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7)"
+    printf 'User:          %s\n' "$USER"
+    printf 'Current shell: %s\n' "$CURRENT_SHELL"
+    printf 'New shell:     %s\n' "$SHELL_PATH"
+
+    if [[ "$CURRENT_SHELL" == "$SHELL_PATH" ]]; then
+        printf '\nZsh is already your login shell.\n'
+        exit 0
+    fi
+
+    printf '\nThis changes your login shell. Existing sessions will not change.\n'
+    read -r -p 'Continue? [y/N] ' answer
+    case "$answer" in
+        y|Y|yes|YES) ;;
+        *)
+            printf 'Cancelled; login shell unchanged.\n'
+            exit 0
+            ;;
+    esac
+
+    if ! command -v chsh >/dev/null 2>&1; then
+        printf 'Error: chsh is not available.\n' >&2
+        exit 1
+    fi
+
+    chsh -s "$SHELL_PATH" "$USER"
+    printf '\nShell-change command completed. Verify with:\n'
+    printf '  getent passwd "$USER" | cut -d: -f1,7\n'
+    exit 0
+fi
+
+# Stow deployment mode.
+if [[ -n "$STOW_PACKAGE" ]]; then
+    if [[ "$MODE" != "dry-run" ]]; then
+        printf 'Error: package installation options cannot be combined with --stow.\n' >&2
+        exit 2
+    fi
+
+    if [[ ! "$STOW_PACKAGE" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        printf 'Error: invalid Stow package name: %s\n' "$STOW_PACKAGE" >&2
+        exit 2
+    fi
+
+    PACKAGE_DIR="$REPO_DIR/$STOW_PACKAGE"
+
+    if [[ ! -d "$PACKAGE_DIR" ]]; then
+        printf 'Error: Stow package directory not found: %s\n' "$PACKAGE_DIR" >&2
+        exit 1
+    fi
+
+    if ! command -v stow >/dev/null 2>&1; then
+        printf 'Error: GNU Stow is not installed. Run the package installer first.\n' >&2
+        exit 1
+    fi
+
+    if [[ "$STOW_PACKAGE" == "zsh" ]]; then
+        TARGET="$HOME/.zshrc"
+        EXPECTED_TARGET="$PACKAGE_DIR/.zshrc"
+
+        if [[ -e "$TARGET" || -L "$TARGET" ]]; then
+            if [[ -L "$TARGET" && "$(readlink -f -- "$TARGET" 2>/dev/null || true)" == "$(readlink -f -- "$EXPECTED_TARGET")" ]]; then
+                printf 'The target %s is already managed by this package.\n' "$TARGET"
+                exit 0
+            fi
+
+            printf 'Error: target exists and is not the expected Stow symlink: %s\n' "$TARGET" >&2
+            printf 'No changes made. Inspect or back up the target manually before retrying.\n' >&2
+            exit 1
+        fi
+    fi
+
+    printf 'Stow package: %s\n' "$STOW_PACKAGE"
+    printf 'Repository:   %s\n' "$REPO_DIR"
+    if [[ "$APPLY_STOW" == true ]]; then
+        printf 'Mode:         apply\n\n'
+    else
+        printf 'Mode:         dry-run\n\n'
+    fi
+
+    if [[ "$APPLY_STOW" == true ]]; then
+        printf 'This will create configuration symlinks in your home directory.\n'
+        read -r -p 'Continue? [y/N] ' answer
+        case "$answer" in
+            y|Y|yes|YES) ;;
+            *)
+                printf 'Cancelled; no configuration changes made.\n'
+                exit 0
+                ;;
+        esac
+        stow --verbose --dir="$REPO_DIR" --target="$HOME" "$STOW_PACKAGE"
+        printf '\nStow deployment completed.\n'
+    else
+        stow --no --verbose --dir="$REPO_DIR" --target="$HOME" "$STOW_PACKAGE"
+        printf 'Dry run only; no configuration changes were made.\n'
+        printf 'Review the proposed links, then add --apply to deploy.\n'
+    fi
+
+    exit 0
+fi
+
+if [[ "$APPLY_STOW" == true ]]; then
+    printf 'Error: --apply requires --stow PACKAGE.\n' >&2
+    exit 2
+fi
+
+if [[ ! -r /etc/os-release ]]; then
+    printf 'Error: cannot identify this operating system.\n' >&2
+    exit 1
+fi
+
+# shellcheck disable=SC1091
+source /etc/os-release
+
+case "${ID:-}" in
+    arch)
+        MANIFEST="$REPO_DIR/packages/arch/required.txt"
+        PACKAGE_MANAGER="pacman"
+        ;;
+    debian)
+        MANIFEST="$REPO_DIR/packages/debian/required.txt"
+        PACKAGE_MANAGER="apt-get"
+        ;;
+    *)
+        printf 'Error: unsupported distribution: %s\n' "${ID:-unknown}" >&2
+        printf 'Supported distributions: Arch Linux and Debian.\n' >&2
+        exit 1
+        ;;
+esac
+
+if [[ ! -r "$MANIFEST" ]]; then
+    printf 'Error: package manifest not found: %s\n' "$MANIFEST" >&2
+    exit 1
+fi
+
+if ! command -v "$PACKAGE_MANAGER" >/dev/null 2>&1; then
+    printf 'Error: required package manager not found: %s\n' "$PACKAGE_MANAGER" >&2
+    exit 1
+fi
+
+declare -a requested=()
+declare -a missing=()
+
+while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%%#*}"
+    line="${line//[[:space:]]/}"
+    [[ -z "$line" ]] && continue
+
+    if [[ ! "$line" =~ ^[a-zA-Z0-9.+:-]+$ ]]; then
+        printf 'Error: invalid package entry in %s: %s\n' "$MANIFEST" "$line" >&2
+        exit 1
+    fi
+
+    requested+=("$line")
+done < "$MANIFEST"
+
+if ((${#requested[@]} == 0)); then
+    printf 'Error: no packages found in %s\n' "$MANIFEST" >&2
+    exit 1
+fi
+
+is_installed() {
+    local package="$1"
+
+    case "$PACKAGE_MANAGER" in
+        pacman)
+            pacman -Q "$package" >/dev/null 2>&1
+            ;;
+        apt-get)
+            dpkg-query -W -f='${Status}' "$package" 2>/dev/null |
+                grep -qx 'install ok installed'
+            ;;
+    esac
+}
+
+printf 'Distribution: %s\n' "${PRETTY_NAME:-$ID}"
+printf 'Manifest:     %s\n' "${MANIFEST#"$REPO_DIR"/}"
+printf 'Mode:         %s\n\n' "$MODE"
+printf '%s\n' 'Checking declared packages...'
+
+for package in "${requested[@]}"; do
+    if is_installed "$package"; then
+        printf '  [installed] %s\n' "$package"
+    else
+        printf '  [missing]   %s\n' "$package"
+        missing+=("$package")
+    fi
+done
+
+if ((${#missing[@]} == 0)); then
+    printf '\nAll required project packages are installed.\n'
+    exit 0
+fi
+
+printf '\nPackages to install: %s\n' "${missing[*]}"
+
+if [[ "$MODE" == "dry-run" ]]; then
+    printf 'Dry run only; no system changes were made.\n'
+    printf 'Review the list, then run with --install to proceed.\n'
+    exit 0
+fi
+
+printf '\nThis will install the missing packages listed above.\n'
+printf 'No packages will be removed.\n'
+read -r -p 'Continue? [y/N] ' answer
+
+case "$answer" in
+    y|Y|yes|YES) ;;
+    *)
+        printf 'Cancelled; no packages were installed.\n'
+        exit 0
+        ;;
+esac
+
+if [[ "$EUID" -eq 0 ]]; then
+    PRIVILEGE=()
+elif command -v sudo >/dev/null 2>&1; then
+    PRIVILEGE=(sudo)
+else
+    printf 'Error: install mode requires root or sudo privileges.\n' >&2
+    exit 1
+fi
+
+case "$PACKAGE_MANAGER" in
+    pacman)
+        "${PRIVILEGE[@]}" pacman -S --needed "${missing[@]}"
+        ;;
+    apt-get)
+        "${PRIVILEGE[@]}" apt-get update
+        "${PRIVILEGE[@]}" apt-get install --no-install-recommends "${missing[@]}"
+        ;;
+esac
+
+printf '\nPackage installation command completed.\n'

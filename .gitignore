@@ -1,0 +1,31 @@
+# Machine-specific configuration
+*.local
+.local/
+.machine/
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+id_ed25519
+credentials
+secrets/
+
+# Private keys and tokens
+*.token
+*.secret
+
+# Editor and operating-system files
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Temporary and backup files
+*.bak
+*.tmp
+*.orig

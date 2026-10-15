@@ -1,0 +1,5 @@
+# Required project packages for Debian.
+# One package name per line; this is a desired installation list.
+zsh
+git
+stow

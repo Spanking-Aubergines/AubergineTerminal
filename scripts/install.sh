@@ -33,28 +33,49 @@ USAGE
 
 APPLY_STOW=false
 SET_SHELL=false
+MODE_EXPLICIT=false
+STOW_EXPLICIT=false
 
 while (($#)); do
     case "$1" in
-        --dry-run)
-            MODE="dry-run"
-            ;;
-        --install)
-            MODE="install"
+        --dry-run|--install)
+            if [[ "$MODE_EXPLICIT" == true ]]; then
+                printf 'Error: specify only one of --dry-run or --install.\n' >&2
+                exit 2
+            fi
+            MODE_EXPLICIT=true
+            if [[ "$1" == "--install" ]]; then
+                MODE="install"
+            else
+                MODE="dry-run"
+            fi
             ;;
         --stow)
+            if [[ "$STOW_EXPLICIT" == true ]]; then
+                printf 'Error: --stow may be specified only once.\n' >&2
+                exit 2
+            fi
             if (($# < 2)) || [[ -z "${2:-}" || "$2" == --* ]]; then
                 printf 'Error: --stow requires a package name.\n' >&2
                 usage >&2
                 exit 2
             fi
+            STOW_EXPLICIT=true
             STOW_PACKAGE="$2"
             shift
             ;;
         --apply)
+            if [[ "$APPLY_STOW" == true ]]; then
+                printf 'Error: --apply may be specified only once.\n' >&2
+                exit 2
+            fi
             APPLY_STOW=true
             ;;
         --set-shell)
+            if [[ "$SET_SHELL" == true ]]; then
+                printf 'Error: --set-shell may be specified only once.\n' >&2
+                exit 2
+            fi
             SET_SHELL=true
             ;;
         --help|-h)
@@ -70,6 +91,22 @@ while (($#)); do
     shift
 done
 
+if [[ "$SET_SHELL" == true ]] &&
+   { [[ "$MODE_EXPLICIT" == true ]] || [[ "$STOW_EXPLICIT" == true ]] || [[ "$APPLY_STOW" == true ]]; }; then
+    printf 'Error: --set-shell cannot be combined with other actions.\n' >&2
+    exit 2
+fi
+
+if [[ "$STOW_EXPLICIT" == true && "$MODE" == "install" ]]; then
+    printf 'Error: --install cannot be combined with --stow.\n' >&2
+    exit 2
+fi
+
+if [[ "$APPLY_STOW" == true && "$STOW_EXPLICIT" == false ]]; then
+    printf 'Error: --apply requires --stow PACKAGE.\n' >&2
+    exit 2
+fi
+
 if [[ -z "${BASH_VERSION:-}" ]]; then
     printf 'Error: this installer must run under Bash.\n' >&2
     exit 1
@@ -77,7 +114,6 @@ fi
 
 REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Login-shell mode is deliberately separate from package installation and Stow.
 if [[ "$SET_SHELL" == true ]]; then
     if [[ "$MODE" != "dry-run" || -n "$STOW_PACKAGE" || "$APPLY_STOW" == true ]]; then
         printf 'Error: --set-shell cannot be combined with other actions.\n' >&2

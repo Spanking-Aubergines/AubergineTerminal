@@ -10,6 +10,7 @@ This project supports Arch Linux and Debian.
 | Version control | git | git |
 | Configuration management | stow | stow |
 | Shell prompt | starship | starship |
+| Ping with a graph | gping | gping |
 | Fuzzy finder and completion menu | fzf | fzf |
 | Terminal file manager | yazi | yazi |
 

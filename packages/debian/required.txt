@@ -6,3 +6,4 @@ stow
 fzf
 starship
 yazi
+gping

@@ -5,7 +5,7 @@ REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_DIR"
 
 printf '%s\n' '--- ShellCheck ---'
-shellcheck scripts/install.sh scripts/install-hooks.sh scripts/bootstrap.sh scripts/hooks/pre-commit tests/test-installer.sh tests/test-manifest.sh tests/test-zsh-functions.sh tests/test-bootstrap.sh tests/run-all.sh
+shellcheck scripts/*.sh scripts/hooks/pre-commit tests/*.sh
 
 printf '\n%s\n' '--- Installer regression tests ---'
 ./tests/test-installer.sh
@@ -15,6 +15,9 @@ printf '\n%s\n' '--- Manifest tests ---'
 
 printf '\n%s\n' '--- Bootstrap tests ---'
 ./tests/test-bootstrap.sh
+
+printf '\n%s\n' '--- Unstow tests ---'
+./tests/test-unstow.sh
 
 ./tests/test-zsh-functions.sh
 

@@ -18,6 +18,15 @@
 - Record distribution-specific package names.
 - Do not automatically remove packages.
 
+
+## Plugin management
+- Zinit is the plugin manager for Zsh.
+- It loads plugins individually from GitHub and from the Oh My Zsh ecosystem
+  without requiring Oh My Zsh itself.
+- Turbo mode is used to defer plugin loading until after the prompt appears,
+  keeping startup fast even with many plugins.
+- Plugins are declared in `zsh/.zshrc`; no external framework is required.
+
 ## Configuration management
 - GNU Stow manages configuration packages.
 - Inspect existing files and symlinks before applying Stow.

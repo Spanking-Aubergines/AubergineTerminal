@@ -21,5 +21,24 @@ setopt INTERACTIVE_COMMENTS
 autoload -Uz compinit
 compinit
 
-# Clear the screen with Ctrl+L.
-bindkey -v
+# Key bindings (emacs mode; Ctrl+L clears the screen).
+bindkey -e
+bindkey '^L' clear-screen
+
+# --- Zinit ---------------------------------------------------------------
+ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zinit"
+if [[ ! -d "$ZINIT_HOME/zinit.git" ]]; then
+    mkdir -p "$ZINIT_HOME"
+    git clone --depth=1 https://github.com/zdharma-continuum/zinit.git \
+        "$ZINIT_HOME/zinit.git"
+fi
+source "$ZINIT_HOME/zinit.git/zinit.zsh"
+
+# Plugins (Turbo mode defers loading until after the prompt appears).
+zinit wait lucid light-mode for \
+    atinit"zicompinit; zicdreplay" \
+        zdharma-continuum/fast-syntax-highlighting \
+    atload"_zsh_autosuggest_start" \
+        zsh-users/zsh-autosuggestions \
+    blockf atpull'zinit creinstall -q .' \
+        zsh-users/zsh-completions

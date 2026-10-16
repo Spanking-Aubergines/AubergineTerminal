@@ -44,6 +44,22 @@ The login-shell operation is separate from package installation and Stow
 deployment. It checks that `/usr/bin/zsh` is executable and listed in
 `/etc/shells`, and requires confirmation before calling `chsh`.
 
+
+## Zsh plugins (managed by Zinit)
+
+| Plugin | Purpose |
+|---|---|
+| zdharma-continuum/fast-syntax-highlighting | Real-time syntax highlighting as you type |
+| zsh-users/zsh-autosuggestions | Fish-style history-based suggestions |
+| zsh-users/zsh-completions | Extra completion definitions |
+
+Zinit itself is cloned on first run of `zsh/.zshrc` into
+`${XDG_DATA_HOME:-$HOME/.local/share}/zinit`. Plugins are loaded in Turbo
+mode, so most of them finish loading just after the first prompt appears.
+
+The primary interactive shell remains Zsh, as declared in
+`packages/<distro>/required.txt`.
+
 ## Dependency management rules
 
 - Add a package only when the project explicitly requires or offers it.

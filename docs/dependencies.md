@@ -9,6 +9,7 @@ This project supports Arch Linux and Debian.
 | Interactive shell | zsh | zsh |
 | Version control | git | git |
 | Configuration management | stow | stow |
+| Shell prompt | starship | starship |
 
 Authoritative installation lists:
 - `packages/arch/required.txt`
@@ -52,7 +53,7 @@ deployment. It checks that `/usr/bin/zsh` is executable and listed in
 | zdharma-continuum/fast-syntax-highlighting | Real-time syntax highlighting as you type |
 | zsh-users/zsh-autosuggestions | Fish-style history-based suggestions |
 | zsh-users/zsh-completions | Extra completion definitions |
-| zsh-users/zsh-history-substring-search | Search history by substring with Ctrl+P/Ctrl+N (k/j in vi command mode) |
+| zsh-users/zsh-history-substring-search | Search history by substring with Ctrl+P/Ctrl+N |
 | hlissner/zsh-autopair | Auto-close brackets and quotes |
 | MichaelAquilina/zsh-you-should-use | Remind you when an alias exists for a command you typed |
 | Aloxaf/fzf-tab | Use fzf as the tab-completion menu (requires `fzf`) |

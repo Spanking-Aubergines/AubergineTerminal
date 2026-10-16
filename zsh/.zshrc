@@ -92,7 +92,6 @@ zinit wait lucid light-mode for \
 zinit light diverdale/colored-man-pages-plus
 
 # Real-time type-ahead completion (loads before autosuggestions and fzf-tab).
-zinit light marlonrichert/zsh-autocomplete
 
 # Fish-style auto-expanding abbreviations.
 zinit light olets/zsh-abbr

@@ -21,6 +21,9 @@ This project supports Arch Linux and Debian.
 | Resource monitor | btop | btop |
 | System info display | fastfetch | fastfetch |
 | Terminal emulator | kitty | kitty |
+| Git TUI | lazygit | lazygit |
+| Docker TUI | lazydocker | lazydocker |
+| Git diff pager | git-delta | git-delta |
 
 Authoritative installation lists:
 - `packages/arch/required.txt`
@@ -82,6 +85,9 @@ deployment. It checks that `/usr/bin/zsh` is executable and listed in
 | MichaelAquilina/zsh-you-should-use | Remind you when an alias exists for a command you typed |
 | Aloxaf/fzf-tab | Use fzf as the tab-completion menu (requires `fzf`) |
 | jeffreytse/zsh-vi-mode | Improved vi mode: cursor shape, ESC delay fix, text objects |
+| diverdale/colored-man-pages-plus | Semantic man-page colors (theme via `COLORED_MAN_THEME`) |
+| marlonrichert/zsh-autocomplete | Real-time type-ahead completion |
+| olets/zsh-abbr | Fish-style auto-expanding abbreviations |
 
 Zinit itself is cloned on first run of `zsh/.zshrc` into
 `${XDG_DATA_HOME:-$HOME/.local/share}/zinit`. Plugins are loaded in Turbo

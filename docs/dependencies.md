@@ -24,6 +24,7 @@ This project supports Arch Linux and Debian.
 | Git TUI | lazygit | lazygit |
 | Docker TUI | lazydocker | lazydocker |
 | Git diff pager | git-delta | git-delta |
+| Simplified man pages | tldr | tldr |
 
 Authoritative installation lists:
 - `packages/arch/required.txt`

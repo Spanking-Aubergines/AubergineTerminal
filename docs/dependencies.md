@@ -84,6 +84,20 @@ Install the relevant utility if a helper reports that it is unavailable.
 These utilities are not added to the required package manifests solely
 because an optional helper can use them.
 
+## Stow packages
+
+Each top-level directory is a GNU Stow package:
+
+| Package | Deploys |
+|---|---|
+| `zsh` | `~/.zshrc`, `~/.config/starship.toml` |
+| `git` | `~/.gitconfig` |
+| `btop` | `~/.config/btop/btop.conf` |
+| `fastfetch` | `~/.config/fastfetch/config.jsonc` |
+| `yazi` | `~/.config/yazi/yazi.toml` |
+
+Deploy one with `./scripts/install.sh --stow PACKAGE --apply`.
+
 ## Dependency management rules
 
 - Add a package only when the project explicitly requires or offers it.

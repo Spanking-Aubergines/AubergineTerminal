@@ -11,10 +11,13 @@ This project supports Arch Linux and Debian.
 | Configuration management | stow | stow |
 | Shell prompt | starship | starship |
 | Fuzzy finder and completion menu | fzf | fzf |
+| Terminal file manager | yazi | yazi |
 
 Authoritative installation lists:
 - `packages/arch/required.txt`
 - `packages/debian/required.txt`
+
+On Debian, configure the official Yazi APT repository using the [upstream installation instructions](https://yazi-rs.github.io/docs/installation/) before installing required packages if `yazi` is unavailable in the configured repositories.
 
 These lists contain explicitly selected desired packages. They must not be
 generated from the set of packages already installed on a machine.
@@ -92,3 +95,10 @@ because an optional helper can use them.
 - Check which required packages are missing before installing.
 - Ask for confirmation before making system changes.
 - Ask for explicit confirmation before changing the login shell.
+
+## Optional terminal tools
+
+| Tool | Purpose | Configuration |
+|---|---|---|
+| btop | Interactive resource monitor | Stow package `btop` |
+| Fastfetch | System information display | Stow package `fastfetch` |

@@ -56,3 +56,23 @@ port() {
     ss -tulpn 2>/dev/null | command grep -E ":${1}([^0-9]|$)" ||
         printf 'Nothing listening on port %s\n' "$1"
 }
+
+# Yazi file manager
+function y() {
+    local cwd_file
+    cwd_file="$(mktemp)" || return 1
+
+    yazi --cwd-file="$cwd_file" "$@"
+    local exit_status=$?
+
+    if [[ -s "$cwd_file" ]]; then
+        local new_dir
+        new_dir="$(<"$cwd_file")"
+        if [[ -n "$new_dir" && -d "$new_dir" ]]; then
+            builtin cd -- "$new_dir"
+        fi
+    fi
+
+    command rm -f -- "$cwd_file"
+    return "$exit_status"
+}

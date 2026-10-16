@@ -1,0 +1,8 @@
+# Yazi file manager configuration.
+
+[mgr]
+show_hidden = true
+sort_by = "natural"
+sort_dir_first = true
+linemode = "size"
+scrolloff = 5

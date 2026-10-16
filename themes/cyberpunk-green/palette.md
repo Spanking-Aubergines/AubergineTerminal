@@ -54,7 +54,7 @@ propagate to each app's theme file.
 
 Each app's theme file is generated from this palette. Status:
 
-- [ ] Starship (`zsh/.config/starship.toml`)
+- [x] Oh My Posh (`zsh/.config/ohmyposh/themes/cyberpunk-green.omp.json`)
 - [ ] kitty (`kitty/.config/kitty/current-theme.conf`)
 - [ ] btop (`btop/.config/btop/btop.conf`)
 - [ ] bat (custom `.tmTheme` + `BAT_THEME`)

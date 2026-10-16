@@ -39,6 +39,14 @@ Run `./scripts/install.sh --help` for all flags.
 
 ## Tests
 
+Run everything with one command:
+
+~~~sh
+./tests/run-all.sh
+~~~
+
+Or run the individual checks:
+
 ~~~sh
 ./tests/test-installer.sh
 ./tests/test-manifest.sh

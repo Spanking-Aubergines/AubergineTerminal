@@ -25,21 +25,21 @@ check() {
 printf '%s\n' '--- Unstow script ---'
 
 # 1. Missing package argument.
-if ! "$REPO_DIR/scripts/unstow.sh" >/dev/null 2>&1; then
+if ! HOME="$FAKE_HOME" "$REPO_DIR/scripts/unstow.sh" >/dev/null 2>&1; then
     check "Rejects missing package" true
 else
     check "Rejects missing package" false
 fi
 
 # 2. Invalid package name.
-if ! "$REPO_DIR/scripts/unstow.sh" '../etc' >/dev/null 2>&1; then
+if ! HOME="$FAKE_HOME" "$REPO_DIR/scripts/unstow.sh" '../etc' >/dev/null 2>&1; then
     check "Rejects invalid package name" true
 else
     check "Rejects invalid package name" false
 fi
 
 # 3. Nonexistent package.
-if ! "$REPO_DIR/scripts/unstow.sh" does-not-exist >/dev/null 2>&1; then
+if ! HOME="$FAKE_HOME" "$REPO_DIR/scripts/unstow.sh" does-not-exist >/dev/null 2>&1; then
     check "Rejects nonexistent package" true
 else
     check "Rejects nonexistent package" false
@@ -51,7 +51,7 @@ link_path="$FAKE_HOME/.config/kitty/kitty.conf"
 if [[ -L "$FAKE_HOME/.config" ]]; then
     link_path="$FAKE_HOME/.config"
 fi
-"$REPO_DIR/scripts/unstow.sh" kitty >/dev/null 2>&1 </dev/null || true
+HOME="$FAKE_HOME" "$REPO_DIR/scripts/unstow.sh" kitty >/dev/null 2>&1 </dev/null || true
 if [[ -L "$link_path" ]]; then
     check "Dry-run leaves symlinks in place" true
 else
@@ -59,7 +59,7 @@ else
 fi
 
 # 5. Apply removes symlinks and reports counts.
-if output="$("$REPO_DIR/scripts/unstow.sh" kitty --apply 2>&1 </dev/null)"; then
+if output="$(HOME="$FAKE_HOME" "$REPO_DIR/scripts/unstow.sh" kitty --apply 2>&1 </dev/null)"; then
     if [[ ! -L "$FAKE_HOME/.config/kitty/kitty.conf" && ! -L "$FAKE_HOME/.config/kitty/current-theme.conf" ]]; then
         check "Apply removes symlinks" true
     else
@@ -75,7 +75,7 @@ fi
 FAKE_HOME2="$TEMP_DIR/home2"
 mkdir -p "$FAKE_HOME2/.config/btop"
 printf 'not a symlink\n' > "$FAKE_HOME2/.config/btop/btop.conf"
-if HOME="$FAKE_HOME2" output="$("$REPO_DIR/scripts/unstow.sh" btop 2>&1 </dev/null)"; then
+if output="$(HOME="$FAKE_HOME2" "$REPO_DIR/scripts/unstow.sh" btop 2>&1 </dev/null)"; then
     if [[ -f "$FAKE_HOME2/.config/btop/btop.conf" && ! -L "$FAKE_HOME2/.config/btop/btop.conf" ]]; then
         check "Leaves non-symlink files alone" true
     else

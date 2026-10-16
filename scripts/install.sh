@@ -287,6 +287,13 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         exit 1
     fi
 
+    for existing in "${requested[@]}"; do
+        if [[ "$existing" == "$line" ]]; then
+            printf 'Error: duplicate package entry in %s: %s\\n' "$MANIFEST" "$line" >&2
+            exit 1
+        fi
+    done
+
     requested+=("$line")
 done < "$MANIFEST"
 

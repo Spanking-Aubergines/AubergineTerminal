@@ -67,4 +67,8 @@ printf '  zsh  \n\n# A comment\ngit # inline comment\n  stow\n' \
     > "$TEST_REPO/packages/arch/required.txt"
 run_test "Accept whitespace, blank lines, and comments" 0
 
+# Duplicate package names: record current behavior before changing the parser.
+printf 'zsh\ngit\nzsh\nstow\n' > "$TEST_REPO/packages/arch/required.txt"
+run_test "Reject duplicate package entries" 1
+
 printf '%s\n' 'Manifest tests completed.'

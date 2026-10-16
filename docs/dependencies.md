@@ -87,7 +87,6 @@ deployment. It checks that `/usr/bin/zsh` is executable and listed in
 | Aloxaf/fzf-tab | Use fzf as the tab-completion menu (requires `fzf`) |
 | jeffreytse/zsh-vi-mode | Improved vi mode: cursor shape, ESC delay fix, text objects |
 | diverdale/colored-man-pages-plus | Semantic man-page colors (theme via `COLORED_MAN_THEME`) |
-| marlonrichert/zsh-autocomplete | Real-time type-ahead completion |
 | olets/zsh-abbr | Fish-style auto-expanding abbreviations |
 
 Zinit itself is cloned on first run of `zsh/.zshrc` into

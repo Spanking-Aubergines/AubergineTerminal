@@ -27,6 +27,16 @@
   keeping startup fast even with many plugins.
 - Plugins are declared in `zsh/.zshrc`; no external framework is required.
 
+## Terminal key bindings
+- fzf provides the following bindings via `source <(fzf --zsh)`:
+  - `Ctrl+R` — fuzzy history search
+  - `Ctrl+T` — fuzzy file picker
+  - `Alt+C` — fuzzy directory jump
+- fzf-tab replaces the default Tab completion menu with fzf.
+- `Ctrl+L` clears the screen; `Ctrl+P` / `Ctrl+N` walk history substring search.
+- vi mode is enabled via zsh-vi-mode; command-mode navigation keys (`j`, `k`)
+  are left untouched so standard vi movement works.
+
 ## Configuration management
 - GNU Stow manages configuration packages.
 - Inspect existing files and symlinks before applying Stow.

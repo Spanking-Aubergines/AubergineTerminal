@@ -70,17 +70,26 @@ else
     printf '%s\n' "$output"
 fi
 
-# 6. Skips files that are not symlinks.
-mkdir -p "$FAKE_HOME/.config/btop"
-printf 'not a symlink\n' > "$FAKE_HOME/.config/btop/btop.conf"
-if output="$("$REPO_DIR/scripts/unstow.sh" btop 2>&1 </dev/null)"; then
-    if [[ -f "$FAKE_HOME/.config/btop/btop.conf" && ! -L "$FAKE_HOME/.config/btop/btop.conf" ]]; then
+# 6. Skips files that are not symlinks. Use a fresh HOME so nothing can
+#    write through a folded symlink into the repository.
+FAKE_HOME2="$TEMP_DIR/home2"
+mkdir -p "$FAKE_HOME2/.config/btop"
+printf 'not a symlink\n' > "$FAKE_HOME2/.config/btop/btop.conf"
+if HOME="$FAKE_HOME2" output="$("$REPO_DIR/scripts/unstow.sh" btop 2>&1 </dev/null)"; then
+    if [[ -f "$FAKE_HOME2/.config/btop/btop.conf" && ! -L "$FAKE_HOME2/.config/btop/btop.conf" ]]; then
         check "Leaves non-symlink files alone" true
     else
         check "Leaves non-symlink files alone" false
     fi
 else
     check "Leaves non-symlink files alone" false
+fi
+
+# Guard: the test must never have written into the repository.
+if [[ -e "$REPO_DIR/btop/.config/btop/not-a-symlink" || -e "$REPO_DIR/kitty/.config/btop" ]]; then
+    check "Test did not leak files into the repository" false
+else
+    check "Test did not leak files into the repository" true
 fi
 
 printf '\n%s\n' '--- Summary ---'

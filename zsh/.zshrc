@@ -107,18 +107,14 @@ fi
 # Machine-specific overrides (not tracked by this repository).
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 
-# Prompt (Starship; loads last so it wins the prompt).
-# >>> Persistent Starship theme >>>
-_starship_theme_dir="$DOTFILES_ZSH_DIR/.config/starship/themes"
-_starship_theme="voight"
-if [[ -r "$HOME/.config/starship-theme" ]]; then
-    _saved_theme="$(<"$HOME/.config/starship-theme")"
-    if [[ -n "$_saved_theme" && -r "$_starship_theme_dir/$_saved_theme.toml" ]]; then
-        _starship_theme="$_saved_theme"
+# Prompt (Oh My Posh; loads last so it wins the prompt).
+_omp_theme_dir="$DOTFILES_ZSH_DIR/.config/ohmyposh/themes"
+_omp_theme="voight"
+if [[ -r "$HOME/.config/ohmyposh-theme" ]]; then
+    _saved_theme="$(<"$HOME/.config/ohmyposh-theme")"
+    if [[ -n "$_saved_theme" && -r "$_omp_theme_dir/$_saved_theme.omp.json" ]]; then
+        _omp_theme="$_saved_theme"
     fi
 fi
-export STARSHIP_CONFIG="$_starship_theme_dir/$_starship_theme.toml"
-unset _starship_theme_dir _starship_theme _saved_theme
-# <<< Persistent Starship theme <<<
-
-eval "$(starship init zsh)"
+eval "$(oh-my-posh init zsh --config "$_omp_theme_dir/$_omp_theme.omp.json")"
+unset _omp_theme_dir _omp_theme _saved_theme

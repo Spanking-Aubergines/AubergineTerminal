@@ -9,7 +9,6 @@ This project supports Arch Linux and Debian.
 | Interactive shell | zsh | zsh |
 | Version control | git | git |
 | Configuration management | stow | stow |
-| Shell prompt | starship | starship |
 | Ping with a graph | gping | gping |
 | Fuzzy finder and completion menu | fzf | fzf |
 | Terminal file manager | yazi | yazi |
@@ -37,7 +36,7 @@ generated from the set of packages already installed on a machine.
 
 ## Nerd Fonts
 
-Prompt and TUI tools (Starship, yazi, eza, btop) use Nerd Font glyphs. A
+Prompt and TUI tools (Oh My Posh, yazi, eza, btop) use Nerd Font glyphs. A
 patched font must be installed for those glyphs to render correctly.
 
 - Arch Linux: `ttf-jetbrains-mono-nerd` (in `packages/arch/required.txt`).
@@ -45,6 +44,20 @@ patched font must be installed for those glyphs to render correctly.
   from <https://www.nerdfonts.com/fonts> into `~/.local/share/fonts/`, then
   run `fc-cache -fv`. The kitty configuration expects
   `JetBrainsMono Nerd Font`.
+
+## Oh My Posh (prompt)
+
+Oh My Posh is installed outside the distribution package managers:
+
+- Arch Linux: AUR package `oh-my-posh-bin` (`yay -S oh-my-posh-bin`).
+- Debian: official install script
+  (`curl -s https://ohmyposh.dev/install.sh | bash -s`).
+
+It is **not** listed in either `required.txt`, because the installer only
+runs `pacman -S` / `apt-get install` and neither repository provides it.
+
+Themes live in `zsh/.config/ohmyposh/themes/*.omp.json` and are selected
+by `prompt-theme`. The active theme is stored in `~/.config/ohmyposh-theme`.
 
 ## Bootstrap prerequisites
 
@@ -126,7 +139,7 @@ Each top-level directory is a GNU Stow package:
 
 | Package | Deploys |
 |---|---|
-| `zsh` | `~/.zshrc`, `~/.config/starship.toml` |
+| `zsh` | `~/.zshrc`, `~/.config/ohmyposh/themes/`, `~/.config/zsh/` |
 | `git` | `~/.gitconfig` |
 | `btop` | `~/.config/btop/btop.conf` |
 | `fastfetch` | `~/.config/fastfetch/config.jsonc` |

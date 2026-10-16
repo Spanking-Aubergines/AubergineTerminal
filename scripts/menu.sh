@@ -340,7 +340,7 @@ show_menu() {
         "Install Git hooks"
         "Run all tests"
         "Show installer help"
-        "Starship Themes            Preview and apply themes"
+        "Oh My Posh Themes          Preview and apply themes"
     )
 
     printf '\n%sACTIONS%s  %s↑/↓ navigate · Enter select · number + Enter shortcut%s\n' \
@@ -488,7 +488,7 @@ while true; do
         10) run_action "$HOOKS" ;;
         11) run_action "$TESTS" ;;
         12) run_action "$INSTALL" --help ;;
-        13) "$REPO_DIR/scripts/starship-themes.sh" menu ;;
+        13) run_action "$REPO_DIR/scripts/prompt-theme.sh" ;;
         s|S) continue ;;
         0|q|Q) printf '\nBye.\n'; exit 0 ;;
         *) printf '\n%sUnknown choice:%s %s\n' "$C_YELLOW" "$C_RESET" "$choice"; pause ;;

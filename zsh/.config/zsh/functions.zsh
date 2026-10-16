@@ -78,44 +78,43 @@ function y() {
 }
 
 
-# >>> Starship theme selector >>>
+# >>> Oh My Posh theme selector >>>
 function prompt-theme() {
-    local theme_dir="${DOTFILES_ZSH_DIR:-$HOME/.dotfiles/zsh}/.config/starship/themes"
-    local selection_file="$HOME/.config/starship-theme"
+    local theme_dir="${DOTFILES_ZSH_DIR:-$HOME/.dotfiles/zsh}/.config/ohmyposh/themes"
+    local selection_file="$HOME/.config/ohmyposh-theme"
     local theme_file theme
     local -a theme_names
 
     if [[ ! -d "$theme_dir" ]]; then
-        print -u2 "Starship themes directory not found: $theme_dir"
+        print -u2 "Oh My Posh themes directory not found: $theme_dir"
         return 1
     fi
 
-    for theme_file in "$theme_dir"/*.toml(N); do
-        theme_names+=("${theme_file:t:r}")
+    for theme_file in "$theme_dir"/*.omp.json(N); do
+        theme_names+=("${${theme_file:t}:r:r}")
     done
 
     if (( ${#theme_names[@]} == 0 )); then
-        print -u2 "No Starship themes found."
+        print -u2 "No Oh My Posh themes found."
         return 1
     fi
 
-    print "\nAvailable Starship themes:"
+    print "\nAvailable Oh My Posh themes:"
     select theme in "${theme_names[@]}"; do
         if [[ -z "$theme" ]]; then
             print "Invalid selection. Choose a listed number."
             continue
         fi
 
-        if ! STARSHIP_CONFIG="$theme_dir/$theme.toml" starship explain >/dev/null 2>&1; then
+        if ! oh-my-posh print primary --config "$theme_dir/$theme.omp.json" >/dev/null 2>&1; then
             print -u2 "Theme failed validation: $theme"
             return 1
         fi
 
         print -r -- "$theme" > "$selection_file" || return 1
-        export STARSHIP_CONFIG="$theme_dir/$theme.toml"
         print "Selected theme: $theme"
-        print "Your selection will persist in future terminals."
+        print "Open a new terminal (or run 'exec zsh') to apply."
         return 0
     done
 }
-# <<< Starship theme selector <<<
+# <<< Oh My Posh theme selector <<<

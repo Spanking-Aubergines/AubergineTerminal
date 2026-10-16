@@ -1,0 +1,111 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 4,
+  "final_space": false,
+  "palette": {
+    "purple": "#7b68ee",
+    "orange": "#ff6b35",
+    "teal": "#00d4aa",
+    "pink": "#e91e63",
+    "red": "#b88989"
+  },
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "right",
+      "segments": [
+        {
+          "type": "executiontime",
+          "style": "plain",
+          "foreground": "p:pink",
+          "template": " {{ .Ms }}ms ",
+          "properties": {
+            "always_enabled": true,
+            "style": "roundrock"
+          }
+        },
+        {
+          "type": "memory",
+          "style": "plain",
+          "foreground": "p:orange",
+          "template": " MEM: {{ .Percentage }}% "
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "p:purple",
+          "template": "\u256d\u2500"
+        },
+        {
+          "type": "session",
+          "style": "plain",
+          "foreground": "p:orange",
+          "template": "[{{ .UserName }}]",
+          "properties": {
+            "display_default": true
+          }
+        },
+        {
+          "type": "git",
+          "style": "plain",
+          "foreground": "p:orange",
+          "template": "<#7b68ee>[</#7b68ee>{{ .HEAD }}<#7b68ee>]</#7b68ee>{{ if .Working.Modified }}<#ff6b35>!{{ .Working.Modified }}{{ end }}</#ff6b35>{{ if .Working.Untracked }}<#ff6b35> ?{{ .Working.Untracked }}{{ end }}</#ff6b35>",
+          "properties": {
+            "branch_icon": "",
+            "fetch_status": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "p:purple",
+          "template": "\u2523"
+        },
+        {
+          "type": "path",
+          "style": "plain",
+          "foreground": "p:orange",
+          "template": "<#7b68ee>[</#7b68ee><#ff6b35>.../</#ff6b35>{{ .Path }}<#7b68ee>]</#7b68ee>",
+          "properties": {
+            "style": "folder"
+          }
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "p:purple",
+          "template": "\u2517"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "p:teal",
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}p:red{{ end }}"
+          ],
+          "template": "\u27a4 "
+        }
+      ]
+    }
+  ]
+}

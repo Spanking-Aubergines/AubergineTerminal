@@ -24,11 +24,11 @@ printf '\n%s\n' '--- Unstow tests ---'
 printf '\n%s\n' '--- Menu tests ---'
 ./tests/test-menu.sh
 
-printf '\n%s\n' '--- Starship theme tests ---'
-./tests/test-starship-themes.sh
+printf '\n%s\n' '--- Prompt theme tests ---'
+./tests/test-prompt-theme.sh
 
 printf '\n%s\n' '--- Syntax checks ---'
-bash -n scripts/install.sh scripts/menu.sh scripts/starship-themes.sh tests/test-installer.sh tests/test-manifest.sh tests/test-zsh-functions.sh tests/test-menu.sh tests/test-starship-themes.sh
+bash -n scripts/install.sh scripts/menu.sh scripts/prompt-theme.sh tests/test-installer.sh tests/test-manifest.sh tests/test-zsh-functions.sh tests/test-menu.sh tests/test-prompt-theme.sh
 zsh -n zsh/.zshrc zsh/aliases.zsh zsh/functions.zsh
 
 printf '\n%s\n' '--- Whitespace check ---'

@@ -59,7 +59,7 @@ else
 fi
 
 # 5. Fresh HOME starts without any dotfiles.
-if [[ ! -e "$FAKE_HOME/.zshrc" && ! -e "$FAKE_HOME/.config/starship.toml" ]]; then
+if [[ ! -e "$FAKE_HOME/.zshrc" && ! -e "$FAKE_HOME/.config/ohmyposh/themes" ]]; then
     check "Fresh HOME starts empty" true
 else
     check "Fresh HOME starts empty" false
@@ -81,11 +81,11 @@ else
     check "Fresh HOME got .zshrc symlink into clone" false
 fi
 
-if [[ -f "$FAKE_HOME/.config/starship.toml" ]] && \
-   [[ "$(readlink -f -- "$FAKE_HOME/.config/starship.toml")" == "$CLONE_DIR2/zsh/.config/starship.toml" ]]; then
-    check "Fresh HOME got starship.toml reachable in clone" true
+if [[ -f "$FAKE_HOME/.config/ohmyposh/themes/voight.omp.json" ]] && \
+   [[ "$(readlink -f -- "$FAKE_HOME/.config/ohmyposh/themes/voight.omp.json")" == "$CLONE_DIR2/zsh/.config/ohmyposh/themes/voight.omp.json" ]]; then
+    check "Fresh HOME got voight.omp.json reachable in clone" true
 else
-    check "Fresh HOME got starship.toml reachable in clone" false
+    check "Fresh HOME got voight.omp.json reachable in clone" false
 fi
 
 printf '\n%s\n' '--- Summary ---'

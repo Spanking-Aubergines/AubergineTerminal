@@ -16,6 +16,14 @@ changes without being asked.
 
 ## Quick start
 
+On a fresh machine:
+
+~~~sh
+DOTFILES_REPO_URL=<this-repo-url> ./scripts/bootstrap.sh
+~~~
+
+Or clone manually:
+
 ~~~sh
 git clone <this-repo> ~/.dotfiles
 cd ~/.dotfiles

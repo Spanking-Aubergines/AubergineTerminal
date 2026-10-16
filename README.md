@@ -22,6 +22,12 @@ On a fresh machine:
 DOTFILES_REPO_URL=<this-repo-url> ./scripts/bootstrap.sh
 ~~~
 
+After the initial install, deploy every configuration package:
+
+~~~sh
+./scripts/install.sh --stow all --apply
+~~~
+
 Or clone manually:
 
 ~~~sh

@@ -1,0 +1,30 @@
+# Minimal Starship theme
+add_newline = false
+
+format = """
+$directory$git_branch$git_status
+$character"""
+
+[directory]
+style = "bold #aab6c5"
+format = "[$path]($style) "
+truncation_length = 3
+truncation_symbol = ".../"
+truncate_to_repo = true
+
+[git_branch]
+symbol = "git:"
+style = "bold #00a896"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "#aab6c5"
+format = "([$all_status$ahead_behind]($style))"
+
+[character]
+success_symbol = "[❯](bold #00a896) "
+error_symbol = "[❯](bold #b88989) "
+vimcmd_symbol = "[❮](bold #7b68ee) "
+
+[package]
+disabled = true

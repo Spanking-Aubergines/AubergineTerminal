@@ -76,3 +76,46 @@ function y() {
     command rm -f -- "$cwd_file"
     return "$exit_status"
 }
+
+
+# >>> Starship theme selector >>>
+function prompt-theme() {
+    local theme_dir="$HOME/.dotfiles/zsh/.config/starship/themes"
+    local selection_file="$HOME/.config/starship-theme"
+    local theme_file theme
+    local -a theme_names
+
+    if [[ ! -d "$theme_dir" ]]; then
+        print -u2 "Starship themes directory not found: $theme_dir"
+        return 1
+    fi
+
+    for theme_file in "$theme_dir"/*.toml(N); do
+        theme_names+=("${theme_file:t:r}")
+    done
+
+    if (( ${#theme_names[@]} == 0 )); then
+        print -u2 "No Starship themes found."
+        return 1
+    fi
+
+    print "\nAvailable Starship themes:"
+    select theme in "${theme_names[@]}"; do
+        if [[ -z "$theme" ]]; then
+            print "Invalid selection. Choose a listed number."
+            continue
+        fi
+
+        if ! STARSHIP_CONFIG="$theme_dir/$theme.toml" starship explain >/dev/null 2>&1; then
+            print -u2 "Theme failed validation: $theme"
+            return 1
+        fi
+
+        print -r -- "$theme" > "$selection_file" || return 1
+        export STARSHIP_CONFIG="$theme_dir/$theme.toml"
+        print "Selected theme: $theme"
+        print "Your selection will persist in future terminals."
+        return 0
+    done
+}
+# <<< Starship theme selector <<<

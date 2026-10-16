@@ -1,0 +1,75 @@
+# Starship prompt configuration.
+# Palette: themes/cyberpunk-green/palette.md
+
+add_newline = true
+palette = 'cyberpunk_green'
+
+format = """
+[╭─](bold neon_green)$username$hostname$directory$git_branch$git_status
+[╰─](bold neon_green)$status$cmd_duration
+$character"""
+
+[palettes.cyberpunk_green]
+neon_green   = '#00ff9f'
+neon_cyan    = '#00e5ff'
+neon_magenta = '#ff2e97'
+neon_amber   = '#ffb000'
+neon_purple  = '#bd93f9'
+neon_blue    = '#4d7fff'
+neon_red     = '#ff3b5c'
+bg           = '#0a1410'
+fg           = '#d8f5e3'
+fg_dim       = '#7a9b8a'
+
+[username]
+show_always = true
+style_user = 'bold bg:neon_green fg:bg'
+style_root = 'bold bg:neon_red fg:fg'
+format = '[ $user ]($style)'
+
+[hostname]
+ssh_only = true
+style = 'bold bg:neon_cyan fg:bg'
+format = '[@$hostname ]($style)'
+
+[directory]
+style = 'bold bg:neon_purple fg:bg'
+format = '[ $path ]($style)'
+truncation_length = 3
+truncation_symbol = '.../'
+truncate_to_repo = true
+
+[git_branch]
+symbol = '>'
+style = 'bold bg:neon_magenta fg:bg'
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = 'bold neon_amber'
+format = '([$all_status$ahead_behind]($style))'
+conflicted = '=${count} '
+ahead = 'up${count} '
+behind = 'down${count} '
+diverged = 'diverged '
+untracked = '?${count} '
+modified = '!${count} '
+staged = '+${count} '
+renamed = '>${count} '
+deleted = 'x${count} '
+
+[status]
+disabled = false
+format = '[ ERROR $status ](bold bg:neon_red fg:fg)'
+style = 'bold bg:neon_red fg:fg'
+
+[cmd_duration]
+min_time = 2000
+format = '[ $duration ](bold neon_amber)'
+
+[character]
+success_symbol = '[ >](bold neon_green)'
+error_symbol = '[ >](bold neon_red)'
+vimcmd_symbol = '[ <](bold neon_cyan)'
+
+[package]
+disabled = true

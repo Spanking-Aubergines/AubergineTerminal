@@ -1,0 +1,77 @@
+# Starship theme inspired by the supplied Oh My Posh configuration.
+# Purple brackets, warm orange text, and teal status indicators.
+
+add_newline = false
+palette = "voight"
+
+format = """
+[╭─](bold purple)$username$git_branch$git_status$status
+[┣](bold purple)$directory
+[┗](bold purple)$character"""
+
+right_format = "$cmd_duration$memory_usage"
+
+
+
+[palettes.voight]
+purple = "#7b68ee"
+orange = "#ff6b35"
+teal = "#00d4aa"
+pink = "#e91e63"
+magenta = "#9c27b0"
+muted = "#aab6c5"
+red = "#b88989"
+
+[username]
+show_always = true
+style_user = "bold orange"
+style_root = "bold teal"
+format = '[\[$user\]]($style)'
+
+[git_branch]
+symbol = ""
+style = "bold orange"
+format = '[\[](bold purple)[$branch](bold orange)[\]](bold purple)'
+
+[git_status]
+style = "bold orange"
+format = '([$all_status$ahead_behind](bold orange))'
+conflicted = "=${count} "
+ahead = "⇡${count} "
+behind = "⇣${count} "
+diverged = "⇕ "
+untracked = "?${count} "
+modified = "!${count} "
+staged = "+${count} "
+renamed = "»${count} "
+deleted = "×${count} "
+
+[directory]
+style = "bold orange"
+format = '[\[$path\]](bold orange) '
+truncation_length = 3
+truncation_symbol = ".../"
+truncate_to_repo = true
+
+[status]
+disabled = false
+format = '[ x$status ](bold teal)'
+style = "bold teal"
+
+[cmd_duration]
+min_time = 0
+show_milliseconds = true
+format = '[ $duration ](bold pink)'
+
+[memory_usage]
+disabled = false
+threshold = -1
+format = '[ MEM: $ram_pct ](bold orange) '
+
+[character]
+success_symbol = "[➤](bold teal) "
+error_symbol = "[➤](bold red) "
+vimcmd_symbol = "[⬅](bold purple) "
+
+[package]
+disabled = true

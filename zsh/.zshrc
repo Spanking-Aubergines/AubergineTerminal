@@ -108,4 +108,16 @@ fi
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 
 # Prompt (Starship; loads last so it wins the prompt).
+# >>> Persistent Starship theme >>>
+_starship_theme="voight"
+if [[ -r "$HOME/.config/starship-theme" ]]; then
+    _saved_theme="$(<"$HOME/.config/starship-theme")"
+    if [[ -n "$_saved_theme" && -r "$HOME/.dotfiles/zsh/.config/starship/themes/$_saved_theme.toml" ]]; then
+        _starship_theme="$_saved_theme"
+    fi
+fi
+export STARSHIP_CONFIG="$HOME/.dotfiles/zsh/.config/starship/themes/$_starship_theme.toml"
+unset _starship_theme _saved_theme
+# <<< Persistent Starship theme <<<
+
 eval "$(starship init zsh)"

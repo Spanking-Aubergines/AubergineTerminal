@@ -52,6 +52,24 @@ run_test() {
     fi
 }
 
+# Assert that an invalid manifest is rejected before pacman is queried.
+assert_rejected_before_pacman() {
+    local test_description="$1"
+    local pass_message="$2"
+    local fail_message="$3"
+
+    : > "$PACMAN_LOG"
+    run_test "$test_description" 1
+
+    if [[ ! -s "$PACMAN_LOG" ]]; then
+        printf 'PASS: %s\n' "$pass_message"
+    else
+        printf 'FAIL: %s\n' "$fail_message"
+        cat "$PACMAN_LOG"
+        exit 1
+    fi
+}
+
 printf '%s\n' '--- Isolated manifest validation ---'
 
 # Empty manifest must fail before checking package installation.
@@ -63,51 +81,31 @@ printf 'zsh\nbad package name\n' > "$TEST_REPO/packages/arch/required.txt"
 run_test "Reject invalid package entry" 1
 
 # Invalid manifests must be rejected before querying pacman.
-: > "$PACMAN_LOG"
 : > "$TEST_REPO/packages/arch/required.txt"
-run_test "Empty manifest does not query pacman" 1
-if [[ ! -s "$PACMAN_LOG" ]]; then
-    printf '%s\n' 'PASS: Empty manifest rejected before package checks'
-else
-    printf '%s\n' 'FAIL: Empty manifest queried pacman'
-    cat "$PACMAN_LOG"
-    exit 1
-fi
+assert_rejected_before_pacman \
+    "Empty manifest does not query pacman" \
+    "Empty manifest rejected before package checks" \
+    "Empty manifest queried pacman"
 
-: > "$PACMAN_LOG"
 printf 'zsh\nbad package name\n' > "$TEST_REPO/packages/arch/required.txt"
-run_test "Invalid entry does not query pacman" 1
-if [[ ! -s "$PACMAN_LOG" ]]; then
-    printf '%s\n' 'PASS: Invalid entry rejected before package checks'
-else
-    printf '%s\n' 'FAIL: Invalid entry queried pacman'
-    cat "$PACMAN_LOG"
-    exit 1
-fi
+assert_rejected_before_pacman \
+    "Invalid entry does not query pacman" \
+    "Invalid entry rejected before package checks" \
+    "Invalid entry queried pacman"
 
 # Internal whitespace must not be silently removed from package names.
-: > "$PACMAN_LOG"
 printf 'zsh\nbad package name\ngit\n' > "$TEST_REPO/packages/arch/required.txt"
-run_test "Reject package name containing internal whitespace" 1
-if [[ ! -s "$PACMAN_LOG" ]]; then
-    printf '%s\n' 'PASS: Internal whitespace rejected before package checks'
-else
-    printf '%s\n' 'FAIL: Internal whitespace reached package checks'
-    cat "$PACMAN_LOG"
-    exit 1
-fi
+assert_rejected_before_pacman \
+    "Reject package name containing internal whitespace" \
+    "Internal whitespace rejected before package checks" \
+    "Internal whitespace reached package checks"
 
 # Invalid characters must be rejected before package checks.
-: > "$PACMAN_LOG"
 printf 'zsh\nbad/package\ngit\n' > "$TEST_REPO/packages/arch/required.txt"
-run_test "Reject package name containing slash" 1
-if [[ ! -s "$PACMAN_LOG" ]]; then
-    printf '%s\n' 'PASS: Invalid character rejected before package checks'
-else
-    printf '%s\n' 'FAIL: Invalid character reached package checks'
-    cat "$PACMAN_LOG"
-    exit 1
-fi
+assert_rejected_before_pacman \
+    "Reject package name containing slash" \
+    "Invalid character rejected before package checks" \
+    "Invalid character reached package checks"
 
 # A valid manifest should reach the package-checking stage and
 # complete in dry-run mode even when every package is missing.
@@ -126,16 +124,11 @@ printf '  zsh  \n\n# A comment\ngit # inline comment\n  stow\n' \
 run_test "Accept whitespace, blank lines, and comments" 0
 
 # Duplicate package names must be rejected before querying pacman.
-: > "$PACMAN_LOG"
 printf 'zsh\ngit\nzsh\nstow\n' > "$TEST_REPO/packages/arch/required.txt"
-run_test "Reject duplicate package entries" 1
-if [[ ! -s "$PACMAN_LOG" ]]; then
-    printf '%s\n' 'PASS: Duplicate entries rejected before package checks'
-else
-    printf '%s\n' 'FAIL: Duplicate entries queried pacman'
-    cat "$PACMAN_LOG"
-    exit 1
-fi
+assert_rejected_before_pacman \
+    "Reject duplicate package entries" \
+    "Duplicate entries rejected before package checks" \
+    "Duplicate entries queried pacman"
 
 # Comments and whitespace alone must not count as package entries.
 printf '   \n\n# No packages here\n    \n# Another comment\n' \

@@ -53,6 +53,16 @@ Or run the individual checks:
 shellcheck scripts/install.sh tests/*.sh
 ~~~
 
+## Development
+
+Install the repo's Git hooks once after cloning:
+
+~~~sh
+./scripts/install-hooks.sh
+~~~
+
+The pre-commit hook runs `./tests/run-all.sh` before each commit.
+
 ## Safety
 
 - Dry-run is the default.

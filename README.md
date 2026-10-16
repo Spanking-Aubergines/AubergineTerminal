@@ -82,6 +82,16 @@ Good. It's built that way:
 
 ---
 
+## Quick install
+
+On a fresh machine with Git installed, clone the repository and launch
+the interactive installation menu:
+
+    git clone https://github.com/Spanking-Aubergines/AubergineTerminal.git ~/.dotfiles && cd ~/.dotfiles && ./scripts/menu.sh
+
+This assumes `~/.dotfiles` does not already exist. The menu guides you
+through package installation and configuration deployment.
+
 ## Quick start (technical)
 
 Clone and run the guided setup:

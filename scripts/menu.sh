@@ -78,33 +78,52 @@ status_item() {
 
 show_system_status() {
     local os_id="unknown"
+    local os_name="Unknown Linux"
     local package_manager="unsupported"
-    local branch
+    local manifest=""
+    local branch="" remote_count=0
+    local staged=0 unstaged=0 untracked=0
+    local package_count=0 pkg
 
     if [[ -r /etc/os-release ]]; then
         # shellcheck disable=SC1091
         . /etc/os-release
         os_id="${ID:-unknown}"
+        os_name="${PRETTY_NAME:-${NAME:-Unknown Linux}}"
     fi
 
     case "$os_id" in
-        arch)   package_manager="pacman" ;;
-        debian) package_manager="apt-get" ;;
+        arch)
+            package_manager="pacman"
+            manifest="$REPO_DIR/packages/arch/required.txt"
+            ;;
+        debian)
+            package_manager="apt-get"
+            manifest="$REPO_DIR/packages/debian/required.txt"
+            ;;
     esac
 
-    printf '\n%sSYSTEM STATUS%s\n' "$C_BOLD" "$C_RESET"
+    printf '\n%sSYSTEM DASHBOARD%s\n' "$C_BOLD" "$C_RESET"
     printf '%s──────────────────────────────────────────────────────────────%s\n' "$C_DIM" "$C_RESET"
 
+    printf '  %s%-12s%s %s\n' "$C_CYAN" "Operating OS" "$C_RESET" "$os_name"
+
     if [[ "$package_manager" == unsupported ]]; then
-        status_item "Distribution" warn "$os_id (installer supports Arch and Debian)"
+        status_item "Package mgr" warn "unsupported distribution: $os_id"
+    elif command -v "$package_manager" >/dev/null 2>&1; then
+        status_item "Package mgr" ok "$package_manager"
     else
-        status_item "Distribution" ok "$os_id"
+        status_item "Package mgr" missing "$package_manager not found"
     fi
 
-    if command -v "$package_manager" >/dev/null 2>&1; then
-        status_item "Package manager" ok "$package_manager"
+    if [[ "$package_manager" != unsupported ]]; then
+        if [[ -r "$manifest" ]]; then
+            status_item "Manifest" ok "${manifest#"$REPO_DIR"/}"
+        else
+            status_item "Manifest" missing "${manifest#"$REPO_DIR"/} not readable"
+        fi
     else
-        status_item "Package manager" missing "$package_manager not found"
+        status_item "Manifest" warn "no manifest for this distribution"
     fi
 
     if command -v git >/dev/null 2>&1; then
@@ -122,54 +141,85 @@ show_system_status() {
     if command -v zsh >/dev/null 2>&1; then
         status_item "Zsh" ok "$(zsh --version 2>/dev/null)"
     else
-        status_item "Zsh" warn "not found; optional until shell setup"
+        status_item "Zsh" warn "optional; not installed"
     fi
 
-    if [[ -x "$INSTALL" ]]; then
-        status_item "install.sh" ok "executable"
-    else
-        status_item "install.sh" missing "missing or not executable"
-    fi
-
-    if [[ -x "$UNSTOW" ]]; then
-        status_item "unstow.sh" ok "executable"
-    else
-        status_item "unstow.sh" missing "missing or not executable"
-    fi
+    for pkg in "$INSTALL" "$UNSTOW"; do
+        if [[ -x "$pkg" ]]; then
+            status_item "$(basename -- "$pkg")" ok "executable"
+        else
+            status_item "$(basename -- "$pkg")" missing "missing or not executable"
+        fi
+    done
 
     if [[ -x "$HOOKS" ]]; then
-        status_item "install-hooks.sh" ok "executable"
+        status_item "Git hooks" ok "installer available"
     else
-        status_item "install-hooks.sh" warn "missing or not executable"
+        status_item "Git hooks" warn "installer missing or not executable"
     fi
 
     if [[ -x "$TESTS" ]]; then
-        status_item "Test runner" ok "executable"
+        status_item "Test runner" ok "available"
     else
         status_item "Test runner" warn "missing or not executable"
     fi
 
-    if git -C "$REPO_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    if command -v git >/dev/null 2>&1 &&
+       git -C "$REPO_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         branch="$(git -C "$REPO_DIR" branch --show-current 2>/dev/null || true)"
-        status_item "Git repository" ok "${branch:-detached HEAD}"
+        [[ -n "$branch" ]] || branch="detached HEAD"
+        status_item "Git branch" info "$branch"
 
-        if git -C "$REPO_DIR" diff --quiet --ignore-submodules -- &&
-           git -C "$REPO_DIR" diff --cached --quiet --ignore-submodules --; then
-            status_item "Tracked files" ok "no staged or unstaged changes"
+        remote_count="$(git -C "$REPO_DIR" remote 2>/dev/null | command wc -l)"
+        if ((remote_count > 0)); then
+            status_item "Git remote" ok "$remote_count configured"
         else
-            status_item "Tracked files" warn "staged or unstaged changes present"
+            status_item "Git remote" warn "no remote configured"
         fi
 
-        if [[ -n "$(git -C "$REPO_DIR" ls-files --others --exclude-standard)" ]]; then
-            status_item "Untracked files" warn "untracked files present"
+        git -C "$REPO_DIR" diff --cached --quiet --ignore-submodules -- ||
+            staged=1
+        git -C "$REPO_DIR" diff --quiet --ignore-submodules -- ||
+            unstaged=1
+
+        if ((staged)); then
+            status_item "Staged" warn "changes staged for commit"
         else
-            status_item "Untracked files" ok "none"
+            status_item "Staged" ok "none"
+        fi
+
+        if ((unstaged)); then
+            status_item "Unstaged" warn "tracked files modified"
+        else
+            status_item "Unstaged" ok "none"
+        fi
+
+        if [[ -n "$(git -C "$REPO_DIR" ls-files --others --exclude-standard 2>/dev/null)" ]]; then
+            untracked=1
+        fi
+
+        if ((untracked)); then
+            status_item "Untracked" warn "untracked files present"
+        else
+            status_item "Untracked" ok "none"
+        fi
+
+        if git -C "$REPO_DIR" rev-parse --abbrev-ref '@{upstream}' >/dev/null 2>&1; then
+            status_item "Upstream" ok "tracking configured"
+        else
+            status_item "Upstream" info "no upstream for current branch"
         fi
     else
         status_item "Git repository" missing "repository metadata unavailable"
     fi
 
-    printf '\n%sNote:%s These checks only inspect your system; they do not install or change anything.\n' \
+    while IFS= read -r pkg; do
+        [[ -n "$pkg" ]] && package_count=$((package_count + 1))
+    done < <(discover_stow_packages)
+
+    status_item "Stow packages" info "$package_count discovered"
+
+    printf '\n%sDiagnostics are read-only; no packages or configurations were changed.%s\n' \
         "$C_DIM" "$C_RESET"
 }
 
@@ -275,32 +325,133 @@ full_setup() {
 }
 
 show_menu() {
-    printf '\n%sACTIONS%s\n' "$C_BOLD" "$C_RESET"
+    local selected="${1:-0}"
+    local i label number
+    local -a labels=(
+        "Full setup                 Packages + Stow + shell"
+        "Show package status        Dry-run"
+        "Install missing packages"
+        "Preview Stow deployment    All packages"
+        "Deploy all Stow packages"
+        "Deploy one Stow package"
+        "Unstow one package         Dry-run"
+        "Unstow one package         Apply"
+        "Set login shell to Zsh"
+        "Install Git hooks"
+        "Run all tests"
+        "Show installer help"
+    )
+
+    printf '\n%sACTIONS%s  %s↑/↓ navigate · Enter select · number + Enter shortcut%s\n' \
+        "$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET"
+
     printf '%s──────────────────────────────────────────────────────────────%s\n' "$C_DIM" "$C_RESET"
-    printf '  %s01%s  Full setup                 %sPackages + Stow + shell%s\n' "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
-    printf '  %s02%s  Show package status        %sDry-run%s\n' "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
-    printf '  %s03%s  Install missing packages\n' "$C_CYAN" "$C_RESET"
-    printf '  %s04%s  Preview Stow deployment    %sAll packages%s\n' "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
-    printf '  %s05%s  Deploy all Stow packages\n' "$C_CYAN" "$C_RESET"
-    printf '  %s06%s  Deploy one Stow package\n' "$C_CYAN" "$C_RESET"
-    printf '  %s07%s  Unstow one package         %sDry-run%s\n' "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
-    printf '  %s08%s  Unstow one package         %sApply%s\n' "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
-    printf '  %s09%s  Set login shell to Zsh\n' "$C_CYAN" "$C_RESET"
-    printf '  %s10%s  Install Git hooks\n' "$C_CYAN" "$C_RESET"
-    printf '  %s11%s  Run all tests\n' "$C_CYAN" "$C_RESET"
-    printf '  %s12%s  Show installer help\n' "$C_CYAN" "$C_RESET"
-    printf '  %s S%s   Refresh system status\n' "$C_GREEN" "$C_RESET"
-    printf '  %s 0%s   Quit\n' "$C_RED" "$C_RESET"
+
+    for i in "${!labels[@]}"; do
+        number=$((i + 1))
+        if ((i == selected)); then
+            printf '  %s%s%2d  %-44s%s\n' \
+                "$C_PURPLE" "$C_BOLD" "$number" "${labels[$i]}" "$C_RESET"
+        else
+            printf '  %s%2d%s  %s\n' "$C_CYAN" "$number" "$C_RESET" "${labels[$i]}"
+        fi
+    done
+
     printf '%s──────────────────────────────────────────────────────────────%s\n' "$C_DIM" "$C_RESET"
+    printf '  %sS%s  Refresh dashboard    %sQ%s  Quit\n' "$C_GREEN" "$C_RESET" "$C_RED" "$C_RESET"
+}
+
+read_menu_choice() {
+    local selected=0 key sequence digits="" saved_tty
+
+    # Keep piped/scripted use predictable and compatible with regression tests.
+    if [[ ! -t 0 || ! -t 1 ]]; then
+        print_header
+        show_system_status
+        show_menu
+        printf '\nChoice (number, S to refresh, Q to quit): '
+        IFS= read -r choice || return 1
+        return 0
+    fi
+
+    saved_tty="$(stty -g)" || return 1
+    if ! stty -echo -icanon min 1 time 0; then
+        return 1
+    fi
+
+    redraw_menu() {
+        printf '\033[2J\033[H'
+        print_header
+        show_system_status
+        show_menu "$selected"
+        printf '\n%sSelect%s ' "$C_BOLD" "$C_RESET"
+        if [[ -n "$digits" ]]; then
+            printf '%s%s%s' "$C_CYAN" "$digits" "$C_RESET"
+        else
+            printf '%sUse arrows and Enter%s' "$C_DIM" "$C_RESET"
+        fi
+        printf '  '
+    }
+
+    restore_menu_tty() {
+        stty "$saved_tty" 2>/dev/null || true
+    }
+
+    redraw_menu
+
+    while IFS= read -r -s -n 1 key; do
+        case "$key" in
+            $'\x1b')
+                sequence=""
+                IFS= read -r -s -n 2 -t 1 sequence || true
+                case "$sequence" in
+                    '[A')
+                        selected=$(((selected + 11) % 12))
+                        digits=""
+                        redraw_menu
+                        ;;
+                    '[B')
+                        selected=$(((selected + 1) % 12))
+                        digits=""
+                        redraw_menu
+                        ;;
+                esac
+                ;;
+            $'\r'|$'\n')
+                restore_menu_tty
+                if [[ -n "$digits" ]]; then
+                    choice="$digits"
+                else
+                    choice="$((selected + 1))"
+                fi
+                printf '\n'
+                return 0
+                ;;
+            [0-9])
+                digits+="$key"
+                redraw_menu
+                ;;
+            $'\177'|$'\b')
+                digits="${digits%?}"
+                redraw_menu
+                ;;
+            s|S|q|Q)
+                restore_menu_tty
+                choice="$key"
+                printf '\n'
+                return 0
+                ;;
+            *)
+                ;;
+        esac
+    done
+
+    restore_menu_tty
+    return 1
 }
 
 while true; do
-    print_header
-    show_system_status
-    show_menu
-
-    printf '\n%sChoice%s %s›%s ' "$C_BOLD" "$C_RESET" "$C_PURPLE" "$C_RESET"
-    read -r choice || exit 0
+    read_menu_choice || exit 0
 
     case "$choice" in
         1|01) full_setup ;;

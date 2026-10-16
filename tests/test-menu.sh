@@ -32,7 +32,7 @@ else
 fi
 
 if output="$(printf 'q\n' | NO_COLOR=1 "$MENU" 2>&1)"; then
-    if grep -q 'SYSTEM STATUS' <<< "$output" &&
+    if grep -q 'SYSTEM DASHBOARD' <<< "$output" &&
        grep -q 'ACTIONS' <<< "$output" &&
        grep -q 'AUBERGINE TERMINAL' <<< "$output"; then
         pass "Menu renders header, status and actions"
@@ -42,15 +42,17 @@ if output="$(printf 'q\n' | NO_COLOR=1 "$MENU" 2>&1)"; then
     fi
 
     if grep -q 'GNU Stow' <<< "$output" &&
-       grep -q 'Package manager' <<< "$output" &&
-       grep -q 'Git repository' <<< "$output"; then
+       grep -q 'Package mgr' <<< "$output" &&
+       grep -q 'Manifest' <<< "$output" &&
+       grep -q 'Git branch' <<< "$output" &&
+       grep -q 'Stow packages' <<< "$output"; then
         pass "System status includes required checks"
     else
         fail "System status includes required checks"
         printf '%s\n' "$output"
     fi
 
-    if grep -q 'do not install or change anything' <<< "$output"; then
+    if grep -q 'Diagnostics are read-only; no packages or configurations were changed.' <<< "$output"; then
         pass "Status panel explains its read-only behaviour"
     else
         fail "Status panel explains its read-only behaviour"

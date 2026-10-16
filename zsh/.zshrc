@@ -88,6 +88,18 @@ zinit wait lucid light-mode for \
         bindkey "\e\e" sudo-command-line
     ' OMZP::sudo
 
+# Semantic man-page colorizer (replaces MANPAGER with a semantic colorizer).
+zinit light diverdale/colored-man-pages-plus
+
+# Real-time type-ahead completion (loads before autosuggestions and fzf-tab).
+zinit light marlonrichert/zsh-autocomplete
+
+# Fish-style auto-expanding abbreviations.
+zinit light olets/zsh-abbr
+
+# Pick a theme: dracula, catppuccin, gruvbox, tokyonight, light, ansi.
+export COLORED_MAN_THEME=catppuccin
+
 # zoxide (smarter cd). Provides z and zi.
 if command -v zoxide >/dev/null 2>&1; then
     eval "$(zoxide init zsh)"

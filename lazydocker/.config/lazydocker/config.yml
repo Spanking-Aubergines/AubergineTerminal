@@ -1,0 +1,8 @@
+gui:
+  scrollHeight: 2
+  sidePanelWidth: 0.3333
+  expandFocusedSidePanel: false
+  nerdFontsVersion: "3"
+
+commandTemplates:
+  dockerCompose: docker compose

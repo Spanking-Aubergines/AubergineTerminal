@@ -16,3 +16,6 @@ zoxide
 btop
 fastfetch
 kitty
+lazygit
+lazydocker
+git-delta

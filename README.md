@@ -33,9 +33,31 @@ Run `./scripts/install.sh --help` for all flags.
 - `scripts/install.sh` — installer (dry-run by default)
 - `packages/<distro>/required.txt` — desired packages per distribution
 - `zsh/.zshrc` — shell configuration (deployed via Stow)
+- `zsh/aliases.zsh` — navigation, listing, Git, and search aliases
+- `zsh/functions.zsh` — directory, archive, process, and port helpers
 - `docs/decisions.md` — project decisions
 - `docs/dependencies.md` — dependency inventory
 - `tests/` — installer and manifest regression tests
+
+## Zsh aliases and functions
+
+Aliases are loaded from `zsh/aliases.zsh`; helper functions are loaded from
+`zsh/functions.zsh`. Both are sourced by `.zshrc` relative to their own file
+location, so the repository does not need to live at a fixed path.
+
+Useful functions:
+
+- `mkcd DIR` — create a directory and change into it.
+- `extract FILE` — extract supported `.tar`, `.tar.gz`, `.tar.bz2`,
+  `.tar.xz`, `.gz`, `.bz2`, `.zip`, and `.7z` archives.
+- `topcpu [N]` / `topmem [N]` — show processes sorted by CPU or memory use
+  (default: 10 entries).
+- `port PORT` — show listening sockets matching a port number.
+
+Archive helpers require the relevant extraction utility to be installed.
+`port` uses `ss`; process listings use `ps` and `head`. These are runtime
+utility dependencies, not additional packages automatically installed by
+the dotfiles installer.
 
 ## Tests
 

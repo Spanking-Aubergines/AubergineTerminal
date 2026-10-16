@@ -10,6 +10,7 @@ This project supports Arch Linux and Debian.
 | Version control | git | git |
 | Configuration management | stow | stow |
 | Shell prompt | starship | starship |
+| Fuzzy finder and completion menu | fzf | fzf |
 
 Authoritative installation lists:
 - `packages/arch/required.txt`
@@ -65,6 +66,20 @@ mode, so most of them finish loading just after the first prompt appears.
 
 The primary interactive shell remains Zsh, as declared in
 `packages/<distro>/required.txt`.
+
+## Utilities used by Zsh helpers
+
+The helper functions use system commands when invoked; not every utility is
+needed for every workflow:
+
+- `extract`: `tar`, `bunzip2`, `gunzip`, `unzip`, or `7z`, depending on the
+  archive format.
+- `topcpu` and `topmem`: `ps` and `head`.
+- `port`: `ss` and `grep`.
+
+Install the relevant utility if a helper reports that it is unavailable.
+These utilities are not added to the required package manifests solely
+because an optional helper can use them.
 
 ## Dependency management rules
 

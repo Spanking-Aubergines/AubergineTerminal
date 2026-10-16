@@ -71,4 +71,9 @@ run_test "Accept whitespace, blank lines, and comments" 0
 printf 'zsh\ngit\nzsh\nstow\n' > "$TEST_REPO/packages/arch/required.txt"
 run_test "Reject duplicate package entries" 1
 
+# Comments and whitespace alone must not count as package entries.
+printf '   \n\n# No packages here\n    \n# Another comment\n' \
+    > "$TEST_REPO/packages/arch/required.txt"
+run_test "Reject comments and whitespace only" 1
+
 printf '%s\n' 'Manifest tests completed.'

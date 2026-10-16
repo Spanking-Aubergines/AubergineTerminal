@@ -75,7 +75,10 @@ zinit wait lucid light-mode for \
     atload'
         zstyle ":completion:*" menu no
         zstyle ":fzf-tab:*" fzf-flags "--height=40%" "--layout=reverse"
-    ' Aloxaf/fzf-tab
+    ' Aloxaf/fzf-tab \
+    atload'
+        bindkey "\e\e" sudo-command-line
+    ' OMZP::sudo
 
 # zoxide (smarter cd). Provides z and zi.
 if command -v zoxide >/dev/null 2>&1; then

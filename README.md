@@ -33,11 +33,14 @@ Run `./scripts/install.sh --help` for all flags.
 - `scripts/install.sh` — installer (dry-run by default)
 - `packages/<distro>/required.txt` — desired packages per distribution
 - `zsh/.zshrc` — shell configuration (deployed via Stow)
+- `git/.gitconfig` — git configuration (deployed via Stow)
 - `zsh/aliases.zsh` — navigation, listing, Git, and search aliases
 - `zsh/functions.zsh` — directory, archive, process, and port helpers
+- `zsh/.config/starship.toml` — Starship prompt (deployed via Stow)
+- `btop/`, `fastfetch/`, `yazi/` — additional Stow packages
 - `docs/decisions.md` — project decisions
 - `docs/dependencies.md` — dependency inventory
-- `tests/` — installer and manifest regression tests
+- `tests/` — installer, manifest, and zsh-function regression tests
 
 ## Zsh aliases and functions
 

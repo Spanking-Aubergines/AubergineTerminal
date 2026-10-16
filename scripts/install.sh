@@ -195,12 +195,11 @@ if [[ -n "$STOW_PACKAGE" ]]; then
         if [[ -e "$TARGET" || -L "$TARGET" ]]; then
             if [[ -L "$TARGET" && "$(readlink -f -- "$TARGET" 2>/dev/null || true)" == "$(readlink -f -- "$EXPECTED_TARGET")" ]]; then
                 printf 'The target %s is already managed by this package.\n' "$TARGET"
-                exit 0
+            else
+                printf 'Error: target exists and is not the expected Stow symlink: %s\n' "$TARGET" >&2
+                printf 'No changes made. Inspect or back up the target manually before retrying.\n' >&2
+                exit 1
             fi
-
-            printf 'Error: target exists and is not the expected Stow symlink: %s\n' "$TARGET" >&2
-            printf 'No changes made. Inspect or back up the target manually before retrying.\n' >&2
-            exit 1
         fi
     fi
 

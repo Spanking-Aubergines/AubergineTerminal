@@ -73,6 +73,41 @@ run_test "Reject invalid Stow package name" 2 --stow '../zsh'
 run_test "Reject nonexistent Stow package" 1 --stow package-that-does-not-exist
 run_test "Recognise already-managed Zsh configuration" 0 --stow zsh
 
+# Regression: when .zshrc is already managed, the installer must still
+# invoke stow so newly added files in the package get deployed.
+TMP_HOME="$(mktemp -d)"
+MOCK_BIN="$(mktemp -d)"
+trap 'rm -rf -- "$TMP_HOME" "$MOCK_BIN"' RETURN
+
+ln -s "$REPO_DIR/zsh/.zshrc" "$TMP_HOME/.zshrc"
+
+cat > "$MOCK_BIN/stow" <<'MOCK'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$STOW_LOG"
+exit 0
+MOCK
+chmod +x "$MOCK_BIN/stow"
+
+STOW_LOG="$MOCK_BIN/stow.log"
+: > "$STOW_LOG"
+
+if printf 'y\n' | HOME="$TMP_HOME" STOW_LOG="$STOW_LOG" PATH="$MOCK_BIN:$PATH" \
+    "$INSTALLER" --stow zsh --apply >/dev/null 2>&1; then
+    if [[ -s "$STOW_LOG" ]]; then
+        printf '%s\n' 'PASS: Stow invoked even when .zshrc already managed'
+        passed=$((passed + 1))
+    else
+        printf '%s\n' 'FAIL: Stow not invoked when .zshrc already managed'
+        failed=$((failed + 1))
+    fi
+else
+    printf '%s\n' 'FAIL: Installer exited non-zero when .zshrc already managed'
+    failed=$((failed + 1))
+fi
+
+rm -rf -- "$TMP_HOME" "$MOCK_BIN"
+trap - RETURN
+
 printf '\n%s\n' '--- Summary ---'
 printf 'Passed: %s\n' "$passed"
 printf 'Failed: %s\n' "$failed"

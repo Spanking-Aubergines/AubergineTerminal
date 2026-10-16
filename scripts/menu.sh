@@ -399,7 +399,7 @@ read_menu_choice() {
 
     redraw_menu
 
-    while IFS= read -r -s -n 1 key; do
+    while IFS= read -r -s -N 1 key; do
         case "$key" in
             $'\x1b')
                 sequence=""

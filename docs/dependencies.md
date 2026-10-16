@@ -96,6 +96,16 @@ Install the relevant utility if a helper reports that it is unavailable.
 These utilities are not added to the required package manifests solely
 because an optional helper can use them.
 
+## Machine-specific overrides
+
+Optional files not tracked by this repository, sourced only if present:
+
+- `~/.zshrc.local` — sourced at the end of `~/.zshrc`.
+- `~/.gitconfig.local` — included by `~/.gitconfig`.
+
+Use these for work email addresses, tokens, machine-only paths, or anything
+that should never enter version control.
+
 ## Stow packages
 
 Each top-level directory is a GNU Stow package:

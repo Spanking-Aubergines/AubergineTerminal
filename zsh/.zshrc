@@ -70,5 +70,8 @@ zinit wait lucid light-mode for \
         zstyle ":fzf-tab:*" fzf-flags "--height=40%" "--layout=reverse"
     ' Aloxaf/fzf-tab
 
+# Machine-specific overrides (not tracked by this repository).
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
 # Prompt (Starship; loads last so it wins the prompt).
 eval "$(starship init zsh)"

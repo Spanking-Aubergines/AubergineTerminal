@@ -63,3 +63,6 @@ zinit wait lucid light-mode for \
         zstyle ":completion:*" menu no
         zstyle ":fzf-tab:*" fzf-flags "--height=40%" "--layout=reverse"
     ' Aloxaf/fzf-tab
+
+# Prompt (Starship; loads last so it wins the prompt).
+eval "$(starship init zsh)"

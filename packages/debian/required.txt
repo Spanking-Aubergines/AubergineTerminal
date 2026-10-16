@@ -4,3 +4,4 @@ zsh
 git
 stow
 fzf
+starship

@@ -50,8 +50,9 @@ For a guided workflow, run:
 ./scripts/menu.sh
 ~~~
 
-It covers package status, installation, Stow deploy/unstow, login shell,
-Git hooks, and the test suite.
+It covers a guided full setup (packages, Stow deployment, login shell),
+package status, installation, Stow deploy/unstow, Git hooks, and the
+test suite.
 
 ## Layout
 

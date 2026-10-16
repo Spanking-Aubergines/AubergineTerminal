@@ -23,6 +23,17 @@ On Debian, configure the official Yazi APT repository using the [upstream instal
 These lists contain explicitly selected desired packages. They must not be
 generated from the set of packages already installed on a machine.
 
+## Nerd Fonts
+
+Prompt and TUI tools (Starship, yazi, eza, btop) use Nerd Font glyphs. A
+patched font must be installed for those glyphs to render correctly.
+
+- Arch Linux: `ttf-jetbrains-mono-nerd` (in `packages/arch/required.txt`).
+- Debian: the Nerd Font patched build is not packaged. Install it manually
+  from <https://www.nerdfonts.com/fonts> into `~/.local/share/fonts/`, then
+  run `fc-cache -fv`. The kitty configuration expects
+  `JetBrainsMono Nerd Font`.
+
 ## Bootstrap prerequisites
 
 - Bash: runs the installer and maintenance scripts.

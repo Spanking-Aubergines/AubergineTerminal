@@ -7,3 +7,4 @@ fzf
 starship
 yazi
 gping
+ttf-jetbrains-mono-nerd

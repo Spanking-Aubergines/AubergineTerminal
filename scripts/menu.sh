@@ -7,20 +7,194 @@ UNSTOW="$REPO_DIR/scripts/unstow.sh"
 HOOKS="$REPO_DIR/scripts/install-hooks.sh"
 TESTS="$REPO_DIR/tests/run-all.sh"
 
+# Enable colour only for a suitable interactive terminal.
+if [[ -t 1 && "${TERM:-dumb}" != dumb && -z "${NO_COLOR:-}" ]]; then
+    C_RESET=$'\033[0m'
+    C_BOLD=$'\033[1m'
+    C_DIM=$'\033[2m'
+    C_PURPLE=$'\033[38;5;141m'
+    C_CYAN=$'\033[38;5;81m'
+    C_GREEN=$'\033[38;5;114m'
+    C_YELLOW=$'\033[38;5;221m'
+    C_RED=$'\033[38;5;203m'
+else
+    C_RESET=''
+    C_BOLD=''
+    C_DIM=''
+    C_PURPLE=''
+    C_CYAN=''
+    C_GREEN=''
+    C_YELLOW=''
+    C_RED=''
+fi
+
 if [[ ! -x "$INSTALL" ]]; then
-    printf 'Error: installer not found: %s\n' "$INSTALL" >&2
+    printf 'Error: installer not found or not executable: %s\n' "$INSTALL" >&2
     exit 1
 fi
 
+print_header() {
+    local os_name branch repo_state
+
+    os_name="Unknown Linux"
+    if [[ -r /etc/os-release ]]; then
+        # shellcheck disable=SC1091
+        . /etc/os-release
+        os_name="${PRETTY_NAME:-${NAME:-Unknown Linux}}"
+    fi
+
+    branch="$(git -C "$REPO_DIR" branch --show-current 2>/dev/null || printf 'unknown')"
+
+    if git -C "$REPO_DIR" diff --quiet --ignore-submodules -- 2>/dev/null &&
+       git -C "$REPO_DIR" diff --cached --quiet --ignore-submodules -- 2>/dev/null; then
+        repo_state="working tree clean"
+    else
+        repo_state="uncommitted changes"
+    fi
+
+    printf '\n'
+    printf '%s╭──────────────────────────────────────────────────────────────╮%s\n' "$C_PURPLE" "$C_RESET"
+    printf '%s│%s  %sAUBERGINE TERMINAL%s                                      %s│%s\n' \
+        "$C_PURPLE" "$C_RESET" "$C_BOLD" "$C_RESET" "$C_PURPLE" "$C_RESET"
+    printf '%s│%s  %sdotfiles manager%s                                          %s│%s\n' \
+        "$C_PURPLE" "$C_RESET" "$C_DIM" "$C_RESET" "$C_PURPLE" "$C_RESET"
+    printf '%s╰──────────────────────────────────────────────────────────────╯%s\n' "$C_PURPLE" "$C_RESET"
+    printf '  %sOS%s       %s\n' "$C_CYAN" "$C_RESET" "$os_name"
+    printf '  %sRepo%s     %s\n' "$C_CYAN" "$C_RESET" "$REPO_DIR"
+    printf '  %sBranch%s   %s  %s(%s)%s\n' \
+        "$C_CYAN" "$C_RESET" "$branch" "$C_DIM" "$repo_state" "$C_RESET"
+}
+
+status_item() {
+    local label="$1" state="$2" detail="${3:-}"
+
+    case "$state" in
+        ok)      printf '  %s[ OK ]%s  %-15s %s\n' "$C_GREEN" "$C_RESET" "$label" "$detail" ;;
+        warn)    printf '  %s[WARN]%s  %-15s %s\n' "$C_YELLOW" "$C_RESET" "$label" "$detail" ;;
+        missing) printf '  %s[MISS]%s  %-15s %s\n' "$C_RED" "$C_RESET" "$label" "$detail" ;;
+        info)    printf '  %s[INFO]%s  %-15s %s\n' "$C_CYAN" "$C_RESET" "$label" "$detail" ;;
+    esac
+}
+
+show_system_status() {
+    local os_id="unknown"
+    local package_manager="unsupported"
+    local branch
+
+    if [[ -r /etc/os-release ]]; then
+        # shellcheck disable=SC1091
+        . /etc/os-release
+        os_id="${ID:-unknown}"
+    fi
+
+    case "$os_id" in
+        arch)   package_manager="pacman" ;;
+        debian) package_manager="apt-get" ;;
+    esac
+
+    printf '\n%sSYSTEM STATUS%s\n' "$C_BOLD" "$C_RESET"
+    printf '%s──────────────────────────────────────────────────────────────%s\n' "$C_DIM" "$C_RESET"
+
+    if [[ "$package_manager" == unsupported ]]; then
+        status_item "Distribution" warn "$os_id (installer supports Arch and Debian)"
+    else
+        status_item "Distribution" ok "$os_id"
+    fi
+
+    if command -v "$package_manager" >/dev/null 2>&1; then
+        status_item "Package manager" ok "$package_manager"
+    else
+        status_item "Package manager" missing "$package_manager not found"
+    fi
+
+    if command -v git >/dev/null 2>&1; then
+        status_item "Git" ok "$(git --version)"
+    else
+        status_item "Git" missing "not found"
+    fi
+
+    if command -v stow >/dev/null 2>&1; then
+        status_item "GNU Stow" ok "$(stow --version 2>/dev/null | command head -n 1)"
+    else
+        status_item "GNU Stow" warn "not found; deployment unavailable"
+    fi
+
+    if command -v zsh >/dev/null 2>&1; then
+        status_item "Zsh" ok "$(zsh --version 2>/dev/null)"
+    else
+        status_item "Zsh" warn "not found; optional until shell setup"
+    fi
+
+    if [[ -x "$INSTALL" ]]; then
+        status_item "install.sh" ok "executable"
+    else
+        status_item "install.sh" missing "missing or not executable"
+    fi
+
+    if [[ -x "$UNSTOW" ]]; then
+        status_item "unstow.sh" ok "executable"
+    else
+        status_item "unstow.sh" missing "missing or not executable"
+    fi
+
+    if [[ -x "$HOOKS" ]]; then
+        status_item "install-hooks.sh" ok "executable"
+    else
+        status_item "install-hooks.sh" warn "missing or not executable"
+    fi
+
+    if [[ -x "$TESTS" ]]; then
+        status_item "Test runner" ok "executable"
+    else
+        status_item "Test runner" warn "missing or not executable"
+    fi
+
+    if git -C "$REPO_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        branch="$(git -C "$REPO_DIR" branch --show-current 2>/dev/null || true)"
+        status_item "Git repository" ok "${branch:-detached HEAD}"
+
+        if git -C "$REPO_DIR" diff --quiet --ignore-submodules -- &&
+           git -C "$REPO_DIR" diff --cached --quiet --ignore-submodules --; then
+            status_item "Tracked files" ok "no staged or unstaged changes"
+        else
+            status_item "Tracked files" warn "staged or unstaged changes present"
+        fi
+
+        if [[ -n "$(git -C "$REPO_DIR" ls-files --others --exclude-standard)" ]]; then
+            status_item "Untracked files" warn "untracked files present"
+        else
+            status_item "Untracked files" ok "none"
+        fi
+    else
+        status_item "Git repository" missing "repository metadata unavailable"
+    fi
+
+    printf '\n%sNote:%s These checks only inspect your system; they do not install or change anything.\n' \
+        "$C_DIM" "$C_RESET"
+}
+
 pause() {
-    printf '\nPress Enter to return to the menu...'
-    read -r _
+    printf '\n%sPress Enter to return to the menu...%s' "$C_DIM" "$C_RESET"
+    read -r _ || true
 }
 
 run_action() {
-    printf '\n'
-    "$@" || printf '\n(exit status: %s)\n' "$?"
+    local result=0
+
+    printf '\n%s▶ Running:%s' "$C_CYAN" "$C_RESET"
+    printf ' %q' "$@"
+    printf '\n\n'
+
+    "$@" || result=$?
+
+    if ((result == 0)); then
+        printf '\n%s✓ Action completed successfully.%s\n' "$C_GREEN" "$C_RESET"
+    else
+        printf '\n%s! Action exited with status %s.%s\n' "$C_YELLOW" "$result" "$C_RESET"
+    fi
+
     pause
+    return 0
 }
 
 discover_stow_packages() {
@@ -39,6 +213,8 @@ discover_stow_packages() {
 
 pick_package() {
     local -a pkgs=()
+    local p choice i
+
     while IFS= read -r p; do
         [[ -n "$p" ]] && pkgs+=("$p")
     done < <(discover_stow_packages)
@@ -48,15 +224,14 @@ pick_package() {
         return 1
     fi
 
-    printf '\nAvailable packages:\n' >&2
-    local i=1
+    printf '\n%sAVAILABLE STOW PACKAGES%s\n' "$C_BOLD" "$C_RESET" >&2
+    i=1
     for p in "${pkgs[@]}"; do
-        printf '  %2d) %s\n' "$i" "$p" >&2
+        printf '  %s%2d)%s %s\n' "$C_CYAN" "$i" "$C_RESET" "$p" >&2
         i=$((i + 1))
     done
     printf '\n' >&2
 
-    local choice
     read -r -p 'Package number (blank to cancel): ' choice
     [[ -z "$choice" ]] && return 1
 
@@ -69,24 +244,27 @@ pick_package() {
 }
 
 full_setup() {
-    printf '\n=== Full setup ===\n\n'
+    local answer
+
+    printf '\n%sFULL SETUP%s\n\n' "$C_BOLD" "$C_RESET"
     printf 'This will:\n'
     printf '  1. Check required packages and ask before installing missing ones\n'
     printf '  2. Deploy every Stow package, asking before creating symlinks\n'
     printf '  3. Offer to change the login shell to Zsh\n\n'
+
     read -r -p 'Continue? [y/N] ' answer
     case "$answer" in
         y|Y|yes|YES) ;;
         *) printf 'Cancelled.\n'; return 0 ;;
     esac
 
-    printf '\n--- Step 1/3: packages ---\n'
+    printf '\n%s── Step 1/3: packages ──%s\n' "$C_PURPLE" "$C_RESET"
     "$INSTALL" --install || true
 
-    printf '\n--- Step 2/3: Stow packages ---\n'
+    printf '\n%s── Step 2/3: Stow packages ──%s\n' "$C_PURPLE" "$C_RESET"
     "$INSTALL" --stow all --apply || true
 
-    printf '\n--- Step 3/3: login shell ---\n'
+    printf '\n%s── Step 3/3: login shell ──%s\n' "$C_PURPLE" "$C_RESET"
     read -r -p 'Change login shell to Zsh now? [y/N] ' answer
     case "$answer" in
         y|Y|yes|YES) "$INSTALL" --set-shell || true ;;
@@ -96,56 +274,70 @@ full_setup() {
     pause
 }
 
+show_menu() {
+    printf '\n%sACTIONS%s\n' "$C_BOLD" "$C_RESET"
+    printf '%s──────────────────────────────────────────────────────────────%s\n' "$C_DIM" "$C_RESET"
+    printf '  %s01%s  Full setup                 %sPackages + Stow + shell%s\n' "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
+    printf '  %s02%s  Show package status        %sDry-run%s\n' "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
+    printf '  %s03%s  Install missing packages\n' "$C_CYAN" "$C_RESET"
+    printf '  %s04%s  Preview Stow deployment    %sAll packages%s\n' "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
+    printf '  %s05%s  Deploy all Stow packages\n' "$C_CYAN" "$C_RESET"
+    printf '  %s06%s  Deploy one Stow package\n' "$C_CYAN" "$C_RESET"
+    printf '  %s07%s  Unstow one package         %sDry-run%s\n' "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
+    printf '  %s08%s  Unstow one package         %sApply%s\n' "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
+    printf '  %s09%s  Set login shell to Zsh\n' "$C_CYAN" "$C_RESET"
+    printf '  %s10%s  Install Git hooks\n' "$C_CYAN" "$C_RESET"
+    printf '  %s11%s  Run all tests\n' "$C_CYAN" "$C_RESET"
+    printf '  %s12%s  Show installer help\n' "$C_CYAN" "$C_RESET"
+    printf '  %s S%s   Refresh system status\n' "$C_GREEN" "$C_RESET"
+    printf '  %s 0%s   Quit\n' "$C_RED" "$C_RESET"
+    printf '%s──────────────────────────────────────────────────────────────%s\n' "$C_DIM" "$C_RESET"
+}
+
 while true; do
-    printf '\n=== dotfiles menu ===\n'
-    printf '  1) Full setup (packages + Stow + shell)\n'
-    printf '  2) Show package status (dry-run)\n'
-    printf '  3) Install missing packages\n'
-    printf '  4) Preview Stow deployment (all packages)\n'
-    printf '  5) Deploy all Stow packages\n'
-    printf '  6) Deploy one Stow package\n'
-    printf '  7) Unstow one package (dry-run)\n'
-    printf '  8) Unstow one package (apply)\n'
-    printf '  9) Set login shell to Zsh\n'
-    printf ' 10) Install Git hooks\n'
-    printf ' 11) Run all tests\n'
-    printf ' 12) Show installer help\n'
-    printf '  0) Quit\n'
-    printf '\nChoice: '
+    print_header
+    show_system_status
+    show_menu
+
+    printf '\n%sChoice%s %s›%s ' "$C_BOLD" "$C_RESET" "$C_PURPLE" "$C_RESET"
     read -r choice || exit 0
 
     case "$choice" in
-        1) full_setup ;;
-        2) run_action "$INSTALL" ;;
-        3) run_action "$INSTALL" --install ;;
-        4) run_action "$INSTALL" --stow all ;;
-        5) run_action "$INSTALL" --stow all --apply ;;
-        6)
+        1|01) full_setup ;;
+        2|02) run_action "$INSTALL" ;;
+        3|03) run_action "$INSTALL" --install ;;
+        4|04) run_action "$INSTALL" --stow all ;;
+        5|05) run_action "$INSTALL" --stow all --apply ;;
+        6|06)
             if pkg="$(pick_package)"; then
                 run_action "$INSTALL" --stow "$pkg"
             else
+                printf 'Package selection cancelled or invalid.\n'
                 pause
             fi
             ;;
-        7)
+        7|07)
             if pkg="$(pick_package)"; then
                 run_action "$UNSTOW" "$pkg"
             else
+                printf 'Package selection cancelled or invalid.\n'
                 pause
             fi
             ;;
-        8)
+        8|08)
             if pkg="$(pick_package)"; then
                 run_action "$UNSTOW" "$pkg" --apply
             else
+                printf 'Package selection cancelled or invalid.\n'
                 pause
             fi
             ;;
-        9) run_action "$INSTALL" --set-shell ;;
+        9|09) run_action "$INSTALL" --set-shell ;;
         10) run_action "$HOOKS" ;;
         11) run_action "$TESTS" ;;
         12) run_action "$INSTALL" --help ;;
-        0|q|Q) printf 'Bye.\n'; exit 0 ;;
-        *) printf 'Unknown choice: %s\n' "$choice" ;;
+        s|S) continue ;;
+        0|q|Q) printf '\nBye.\n'; exit 0 ;;
+        *) printf '\n%sUnknown choice:%s %s\n' "$C_YELLOW" "$C_RESET" "$choice"; pause ;;
     esac
 done

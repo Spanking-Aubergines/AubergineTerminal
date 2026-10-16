@@ -21,8 +21,11 @@ printf '\n%s\n' '--- Unstow tests ---'
 
 ./tests/test-zsh-functions.sh
 
+printf '\n%s\n' '--- Menu tests ---'
+./tests/test-menu.sh
+
 printf '\n%s\n' '--- Syntax checks ---'
-bash -n scripts/install.sh tests/test-installer.sh tests/test-manifest.sh tests/test-zsh-functions.sh
+bash -n scripts/install.sh scripts/menu.sh tests/test-installer.sh tests/test-manifest.sh tests/test-zsh-functions.sh tests/test-menu.sh
 zsh -n zsh/.zshrc zsh/aliases.zsh zsh/functions.zsh
 
 printf '\n%s\n' '--- Whitespace check ---'

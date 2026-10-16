@@ -117,6 +117,88 @@ else
     fi
 fi
 
+# Mock ps to test CPU/memory sorting output and output limits.
+cat > "$MOCK_BIN/ps" <<'MOCK'
+#!/usr/bin/env bash
+# head intentionally closes the pipe early; suppress expected broken-pipe errors.
+exec 2>/dev/null
+case "$*" in
+    *%cpu*)
+        printf 'PID PPID CMD %%CPU\n'
+        for pid in {101..111}; do
+            printf '%s 1 cpu-process-%s %s.0\n' "$pid" "$pid" "$pid"
+        done
+        ;;
+    *%mem*)
+        printf 'PID PPID CMD %%MEM\n'
+        for pid in {201..211}; do
+            printf '%s 1 mem-process-%s %s.0\n' "$pid" "$pid" "$pid"
+        done
+        ;;
+    *)
+        printf 'Unexpected ps arguments: %s\n' "$*" >&2
+        exit 99
+        ;;
+esac
+MOCK
+chmod +x "$MOCK_BIN/ps"
+
+# The single-quoted program is intentionally passed to Zsh unchanged.
+# shellcheck disable=SC2016
+if output="$(PATH="$MOCK_BIN:$PATH" "$ZSH_BIN" -c '
+    source "$1"
+    topcpu 2
+' zsh-test "$FUNCTIONS_FILE" 2>&1)" &&
+   [[ "$(printf '%s\n' "$output" | wc -l)" -eq 2 &&
+      "$output" == *"cpu-process-101"* &&
+      "$output" != *"cpu-process-102"* ]]; then
+    pass "topcpu respects a custom output limit"
+else
+    fail "topcpu respects a custom output limit"
+    printf '%s\n' "${output:-No output}"
+fi
+
+# The single-quoted program is intentionally passed to Zsh unchanged.
+# shellcheck disable=SC2016
+if output="$(PATH="$MOCK_BIN:$PATH" "$ZSH_BIN" -c '
+    source "$1"
+    topmem 2
+' zsh-test "$FUNCTIONS_FILE" 2>&1)" &&
+   [[ "$(printf '%s\n' "$output" | wc -l)" -eq 2 &&
+      "$output" == *"mem-process-201"* &&
+      "$output" != *"mem-process-202"* ]]; then
+    pass "topmem respects a custom output limit"
+else
+    fail "topmem respects a custom output limit"
+    printf '%s\n' "${output:-No output}"
+fi
+
+# The single-quoted program is intentionally passed to Zsh unchanged.
+# shellcheck disable=SC2016
+if output="$(PATH="$MOCK_BIN:$PATH" "$ZSH_BIN" -c '
+    source "$1"
+    topcpu
+' zsh-test "$FUNCTIONS_FILE" 2>&1)" &&
+   [[ "$(printf '%s\n' "$output" | wc -l)" -eq 10 ]]; then
+    pass "topcpu defaults to 10 lines"
+else
+    fail "topcpu defaults to 10 lines"
+    printf '%s\n' "${output:-No output}"
+fi
+
+# The single-quoted program is intentionally passed to Zsh unchanged.
+# shellcheck disable=SC2016
+if output="$(PATH="$MOCK_BIN:$PATH" "$ZSH_BIN" -c '
+    source "$1"
+    topmem
+' zsh-test "$FUNCTIONS_FILE" 2>&1)" &&
+   [[ "$(printf '%s\n' "$output" | wc -l)" -eq 10 ]]; then
+    pass "topmem defaults to 10 lines"
+else
+    fail "topmem defaults to 10 lines"
+    printf '%s\n' "${output:-No output}"
+fi
+
 # Mock ss to test port output and invalid arguments deterministically.
 cat > "$MOCK_BIN/ss" <<'MOCK'
 #!/usr/bin/env bash

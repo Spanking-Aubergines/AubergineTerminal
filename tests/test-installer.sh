@@ -108,6 +108,22 @@ fi
 rm -rf -- "$TMP_HOME" "$MOCK_BIN"
 trap - RETURN
 
+# --stow all should list every package and succeed in dry-run mode.
+if output="$("$INSTALLER" --stow all 2>&1)"; then
+    if command grep -q 'Stow packages:.*zsh' <<< "$output" && \
+       command grep -q 'Stow packages:.*kitty' <<< "$output"; then
+        printf '%s\n' 'PASS: --stow all lists packages'
+        passed=$((passed + 1))
+    else
+        printf '%s\n' 'FAIL: --stow all did not list expected packages'
+        printf '%s\n' "$output"
+        failed=$((failed + 1))
+    fi
+else
+    printf '%s\n' 'FAIL: --stow all exited non-zero'
+    failed=$((failed + 1))
+fi
+
 printf '\n%s\n' '--- Summary ---'
 printf 'Passed: %s\n' "$passed"
 printf 'Failed: %s\n' "$failed"

@@ -164,6 +164,21 @@ if [[ "$SET_SHELL" == true ]]; then
     exit 0
 fi
 
+# Discover Stow packages: top-level dirs containing at least one dot-entry.
+discover_stow_packages() {
+    local entry base
+    for entry in "$REPO_DIR"/*/; do
+        [[ -d "$entry" ]] || continue
+        base="$(basename -- "$entry")"
+        case "$base" in
+            docs|packages|scripts|tests) continue ;;
+        esac
+        if [[ -n "$(command find "$entry" -maxdepth 1 -name '.*' -print -quit 2>/dev/null)" ]]; then
+            printf '%s\n' "$base"
+        fi
+    done
+}
+
 # Stow deployment mode.
 if [[ -n "$STOW_PACKAGE" ]]; then
     if [[ "$MODE" != "dry-run" ]]; then
@@ -171,44 +186,39 @@ if [[ -n "$STOW_PACKAGE" ]]; then
         exit 2
     fi
 
-    if [[ ! "$STOW_PACKAGE" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-        printf 'Error: invalid Stow package name: %s\n' "$STOW_PACKAGE" >&2
-        exit 2
-    fi
-
-    PACKAGE_DIR="$REPO_DIR/$STOW_PACKAGE"
-
-    if [[ ! -d "$PACKAGE_DIR" ]]; then
-        printf 'Error: Stow package directory not found: %s\n' "$PACKAGE_DIR" >&2
-        exit 1
-    fi
-
     if ! command -v stow >/dev/null 2>&1; then
         printf 'Error: GNU Stow is not installed. Run the package installer first.\n' >&2
         exit 1
     fi
 
-    if [[ "$STOW_PACKAGE" == "zsh" ]]; then
-        TARGET="$HOME/.zshrc"
-        EXPECTED_TARGET="$PACKAGE_DIR/.zshrc"
-
-        if [[ -e "$TARGET" || -L "$TARGET" ]]; then
-            if [[ -L "$TARGET" && "$(readlink -f -- "$TARGET" 2>/dev/null || true)" == "$(readlink -f -- "$EXPECTED_TARGET")" ]]; then
-                printf 'The target %s is already managed by this package.\n' "$TARGET"
-            else
-                printf 'Error: target exists and is not the expected Stow symlink: %s\n' "$TARGET" >&2
-                printf 'No changes made. Inspect or back up the target manually before retrying.\n' >&2
-                exit 1
-            fi
+    declare -a stow_packages=()
+    if [[ "$STOW_PACKAGE" == "all" ]]; then
+        while IFS= read -r pkg; do
+            [[ -n "$pkg" ]] && stow_packages+=("$pkg")
+        done < <(discover_stow_packages)
+        if ((${#stow_packages[@]} == 0)); then
+            printf 'Error: no Stow packages found in %s\n' "$REPO_DIR" >&2
+            exit 1
         fi
+    else
+        if [[ ! "$STOW_PACKAGE" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+            printf 'Error: invalid Stow package name: %s\n' "$STOW_PACKAGE" >&2
+            exit 2
+        fi
+        PACKAGE_DIR="$REPO_DIR/$STOW_PACKAGE"
+        if [[ ! -d "$PACKAGE_DIR" ]]; then
+            printf 'Error: Stow package directory not found: %s\n' "$PACKAGE_DIR" >&2
+            exit 1
+        fi
+        stow_packages=("$STOW_PACKAGE")
     fi
 
-    printf 'Stow package: %s\n' "$STOW_PACKAGE"
-    printf 'Repository:   %s\n' "$REPO_DIR"
+    printf 'Repository:    %s\n' "$REPO_DIR"
+    printf 'Stow packages: %s\n' "${stow_packages[*]}"
     if [[ "$APPLY_STOW" == true ]]; then
-        printf 'Mode:         apply\n\n'
+        printf 'Mode:          apply\n\n'
     else
-        printf 'Mode:         dry-run\n\n'
+        printf 'Mode:          dry-run\n\n'
     fi
 
     if [[ "$APPLY_STOW" == true ]]; then
@@ -221,11 +231,38 @@ if [[ -n "$STOW_PACKAGE" ]]; then
                 exit 0
                 ;;
         esac
-        stow --verbose --dir="$REPO_DIR" --target="$HOME" "$STOW_PACKAGE"
+    fi
+
+    for pkg in "${stow_packages[@]}"; do
+        PACKAGE_DIR="$REPO_DIR/$pkg"
+
+        printf '\n=== %s ===\n' "$pkg"
+
+        if [[ "$pkg" == "zsh" ]]; then
+            TARGET="$HOME/.zshrc"
+            EXPECTED_TARGET="$PACKAGE_DIR/.zshrc"
+            if [[ -e "$TARGET" || -L "$TARGET" ]]; then
+                if [[ -L "$TARGET" && "$(readlink -f -- "$TARGET" 2>/dev/null || true)" == "$(readlink -f -- "$EXPECTED_TARGET")" ]]; then
+                    printf 'The target %s is already managed by this package.\n' "$TARGET"
+                else
+                    printf 'Error: target exists and is not the expected Stow symlink: %s\n' "$TARGET" >&2
+                    printf 'No changes made. Inspect or back up the target manually before retrying.\n' >&2
+                    exit 1
+                fi
+            fi
+        fi
+
+        if [[ "$APPLY_STOW" == true ]]; then
+            stow --verbose --dir="$REPO_DIR" --target="$HOME" "$pkg"
+        else
+            stow --no --verbose --dir="$REPO_DIR" --target="$HOME" "$pkg"
+        fi
+    done
+
+    if [[ "$APPLY_STOW" == true ]]; then
         printf '\nStow deployment completed.\n'
     else
-        stow --no --verbose --dir="$REPO_DIR" --target="$HOME" "$STOW_PACKAGE"
-        printf 'Dry run only; no configuration changes were made.\n'
+        printf '\nDry run only; no configuration changes were made.\n'
         printf 'Review the proposed links, then add --apply to deploy.\n'
     fi
 

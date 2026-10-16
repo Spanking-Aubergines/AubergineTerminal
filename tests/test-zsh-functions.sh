@@ -5,7 +5,7 @@ REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMP_DIR="$(mktemp -d)"
 trap 'rm -rf -- "$TEMP_DIR"' EXIT
 
-FUNCTIONS_FILE="$REPO_DIR/zsh/functions.zsh"
+FUNCTIONS_FILE="$REPO_DIR/zsh/.config/zsh/functions.zsh"
 ZSH_BIN="$(command -v zsh)"
 MOCK_BIN="$TEMP_DIR/bin"
 mkdir -p "$MOCK_BIN"

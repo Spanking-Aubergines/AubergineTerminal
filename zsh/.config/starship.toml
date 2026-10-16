@@ -1,0 +1,72 @@
+add_newline = true
+palette = 'cyberpunk'
+
+format = """
+[╭─](bold neon_purple)$username$hostname$directory$git_branch$git_status
+[╰─](bold neon_purple)$status$cmd_duration
+$character"""
+
+[palettes.cyberpunk]
+neon_purple = '#bd93f9'
+deep_purple = '#7c3aed'
+neon_green = '#39ff14'
+cyan = '#00e5ff'
+hot_pink = '#ff2e97'
+warning = '#ffb000'
+muted = '#77718c'
+error = '#ff3b5c'
+black = '#101018'
+white = '#f8f8ff'
+
+[username]
+show_always = true
+style_user = 'bold black bg:neon_purple'
+style_root = 'bold white bg:error'
+format = '[ $user ]($style)'
+
+[hostname]
+ssh_only = true
+style = 'bold black bg:cyan'
+format = '[@$hostname ]($style)'
+
+[directory]
+style = 'bold white bg:deep_purple'
+format = '[ $path ]($style)'
+truncation_length = 3
+truncation_symbol = '.../'
+truncate_to_repo = true
+
+[git_branch]
+symbol = '>'
+style = 'bold black bg:hot_pink'
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = 'bold warning'
+format = '([$all_status$ahead_behind]($style))'
+conflicted = '=${count} '
+ahead = 'up${count} '
+behind = 'down${count} '
+diverged = 'diverged '
+untracked = '?${count} '
+modified = '!${count} '
+staged = '+${count} '
+renamed = '>${count} '
+deleted = 'x${count} '
+
+[status]
+disabled = false
+format = '[ ERROR $status ](bold white bg:error)'
+style = 'bold white bg:error'
+
+[cmd_duration]
+min_time = 2000
+format = '[ $duration ](bold warning)'
+
+[character]
+success_symbol = '[ >](bold neon_green)'
+error_symbol = '[ >](bold error)'
+vimcmd_symbol = '[ <](bold cyan)'
+
+[package]
+disabled = true

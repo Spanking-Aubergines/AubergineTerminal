@@ -21,7 +21,7 @@ and gets "linked" into the right spot on any machine.
 **On a brand-new machine**, open a terminal and run:
 
 ~~~sh
-git clone <this-repo-url> ~/.dotfiles
+git clone https://github.com/Spanking-Aubergines/AubergineTerminal.git ~/.dotfiles
 cd ~/.dotfiles
 ./scripts/menu.sh
 ~~~
@@ -87,7 +87,7 @@ Good. It's built that way:
 Clone and run the guided setup:
 
 ~~~sh
-git clone <this-repo> ~/.dotfiles
+git clone https://github.com/Spanking-Aubergines/AubergineTerminal.git ~/.dotfiles
 cd ~/.dotfiles
 ./scripts/menu.sh
 ~~~
@@ -109,7 +109,7 @@ Or drive it directly:
 On a fresh machine, clone and set up in one command:
 
 ~~~sh
-DOTFILES_REPO_URL=<this-repo-url> ./scripts/bootstrap.sh
+DOTFILES_REPO_URL=https://github.com/Spanking-Aubergines/AubergineTerminal.git ./scripts/bootstrap.sh
 ~~~
 
 ## Interactive menu

@@ -25,6 +25,11 @@ compinit
 bindkey -v
 bindkey '^L' clear-screen
 
+# Aliases (resolved relative to this .zshrc, so the repo can live anywhere).
+DOTFILES_ZSH_DIR="${${(%):-%x}:A:h}"
+[[ -f "$DOTFILES_ZSH_DIR/aliases.zsh" ]] && source "$DOTFILES_ZSH_DIR/aliases.zsh"
+unset DOTFILES_ZSH_DIR
+
 # --- Zinit ---------------------------------------------------------------
 ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zinit"
 if [[ ! -d "$ZINIT_HOME/zinit.git" ]]; then

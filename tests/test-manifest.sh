@@ -85,6 +85,30 @@ else
     exit 1
 fi
 
+# Internal whitespace must not be silently removed from package names.
+: > "$PACMAN_LOG"
+printf 'zsh\nbad package name\ngit\n' > "$TEST_REPO/packages/arch/required.txt"
+run_test "Reject package name containing internal whitespace" 1
+if [[ ! -s "$PACMAN_LOG" ]]; then
+    printf '%s\n' 'PASS: Internal whitespace rejected before package checks'
+else
+    printf '%s\n' 'FAIL: Internal whitespace reached package checks'
+    cat "$PACMAN_LOG"
+    exit 1
+fi
+
+# Invalid characters must be rejected before package checks.
+: > "$PACMAN_LOG"
+printf 'zsh\nbad/package\ngit\n' > "$TEST_REPO/packages/arch/required.txt"
+run_test "Reject package name containing slash" 1
+if [[ ! -s "$PACMAN_LOG" ]]; then
+    printf '%s\n' 'PASS: Invalid character rejected before package checks'
+else
+    printf '%s\n' 'FAIL: Invalid character reached package checks'
+    cat "$PACMAN_LOG"
+    exit 1
+fi
+
 # A valid manifest should reach the package-checking stage and
 # complete in dry-run mode even when every package is missing.
 printf 'zsh\ngit\nstow\n' > "$TEST_REPO/packages/arch/required.txt"

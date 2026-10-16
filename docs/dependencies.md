@@ -56,6 +56,7 @@ deployment. It checks that `/usr/bin/zsh` is executable and listed in
 | hlissner/zsh-autopair | Auto-close brackets and quotes |
 | MichaelAquilina/zsh-you-should-use | Remind you when an alias exists for a command you typed |
 | Aloxaf/fzf-tab | Use fzf as the tab-completion menu (requires `fzf`) |
+| jeffreytse/zsh-vi-mode | Improved vi mode: cursor shape, ESC delay fix, text objects |
 
 Zinit itself is cloned on first run of `zsh/.zshrc` into
 `${XDG_DATA_HOME:-$HOME/.local/share}/zinit`. Plugins are loaded in Turbo

@@ -34,6 +34,10 @@ if [[ ! -d "$ZINIT_HOME/zinit.git" ]]; then
 fi
 source "$ZINIT_HOME/zinit.git/zinit.zsh"
 
+# Vi mode (loads first; it overwrites keybindings from other plugins).
+zinit ice depth=1
+zinit light jeffreytse/zsh-vi-mode
+
 # Plugins (Turbo mode defers loading until after the prompt appears).
 zinit wait lucid light-mode for \
     atinit"zicompinit; zicdreplay" \

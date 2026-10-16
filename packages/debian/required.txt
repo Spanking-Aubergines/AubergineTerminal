@@ -8,3 +8,10 @@ starship
 yazi
 gping
 eza
+bat
+fd-find
+ripgrep
+zoxide
+btop
+fastfetch
+kitty

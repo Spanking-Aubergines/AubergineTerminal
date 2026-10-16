@@ -9,3 +9,10 @@ yazi
 gping
 ttf-jetbrains-mono-nerd
 eza
+bat
+fd
+ripgrep
+zoxide
+btop
+fastfetch
+kitty

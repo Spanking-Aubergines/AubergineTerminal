@@ -13,6 +13,14 @@ This project supports Arch Linux and Debian.
 | Ping with a graph | gping | gping |
 | Fuzzy finder and completion menu | fzf | fzf |
 | Terminal file manager | yazi | yazi |
+| `cat` replacement | bat | bat |
+| `find` replacement | fd | fd-find |
+| `grep` replacement | ripgrep | ripgrep |
+| Smarter `cd` | zoxide | zoxide |
+| `ls` replacement | eza | eza |
+| Resource monitor | btop | btop |
+| System info display | fastfetch | fastfetch |
+| Terminal emulator | kitty | kitty |
 
 Authoritative installation lists:
 - `packages/arch/required.txt`

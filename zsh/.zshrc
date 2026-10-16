@@ -14,11 +14,19 @@ setopt SHARE_HISTORY
 setopt HIST_FCNTL_LOCK
 
 # bat (used as pager and cat replacement when available).
+# Debian ships the binary as "batcat".
+BAT_BIN=""
 if command -v bat >/dev/null 2>&1; then
+    BAT_BIN="bat"
+elif command -v batcat >/dev/null 2>&1; then
+    BAT_BIN="batcat"
+fi
+if [[ -n "$BAT_BIN" ]]; then
     export BAT_THEME="ansi"
-    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+    export MANPAGER="sh -c 'col -bx | $BAT_BIN -l man -p'"
     export MANROFFOPT="-c"
 fi
+unset BAT_BIN
 
 # Useful interactive behavior.
 setopt AUTO_CD

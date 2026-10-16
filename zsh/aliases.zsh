@@ -30,12 +30,18 @@ alias gb='git branch'
 if command -v rg >/dev/null 2>&1; then
     alias grep='rg'
 fi
+# Debian ships fd as "fdfind"; Arch ships it as "fd".
 if command -v fd >/dev/null 2>&1; then
     alias find='fd'
+elif command -v fdfind >/dev/null 2>&1; then
+    alias find='fdfind'
 fi
 
-# cat replacement
+# cat replacement. Debian ships bat as "batcat".
 if command -v bat >/dev/null 2>&1; then
     alias cat='bat --style=plain --paging=never'
     alias catp='bat'
+elif command -v batcat >/dev/null 2>&1; then
+    alias cat='batcat --style=plain --paging=never'
+    alias catp='batcat'
 fi

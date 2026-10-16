@@ -47,8 +47,8 @@ zinit wait lucid light-mode for \
     atload'
         bindkey -M viins "\C-p" history-substring-search-up
         bindkey -M viins "\C-n" history-substring-search-down
-        bindkey -M vicmd "k" history-substring-search-up
-        bindkey -M vicmd "j" history-substring-search-down
+        bindkey -M vicmd "\C-p" history-substring-search-up
+        bindkey -M vicmd "\C-n" history-substring-search-down
     ' zsh-users/zsh-history-substring-search \
     atload'
         source <(fzf --zsh)

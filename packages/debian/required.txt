@@ -7,3 +7,4 @@ fzf
 starship
 yazi
 gping
+eza

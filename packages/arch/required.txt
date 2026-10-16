@@ -8,3 +8,4 @@ starship
 yazi
 gping
 ttf-jetbrains-mono-nerd
+eza

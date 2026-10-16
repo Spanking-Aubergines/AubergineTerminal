@@ -13,6 +13,13 @@ setopt HIST_IGNORE_SPACE
 setopt SHARE_HISTORY
 setopt HIST_FCNTL_LOCK
 
+# bat (used as pager and cat replacement when available).
+if command -v bat >/dev/null 2>&1; then
+    export BAT_THEME="ansi"
+    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+    export MANROFFOPT="-c"
+fi
+
 # Useful interactive behavior.
 setopt AUTO_CD
 setopt INTERACTIVE_COMMENTS
@@ -69,6 +76,11 @@ zinit wait lucid light-mode for \
         zstyle ":completion:*" menu no
         zstyle ":fzf-tab:*" fzf-flags "--height=40%" "--layout=reverse"
     ' Aloxaf/fzf-tab
+
+# zoxide (smarter cd). Provides z and zi.
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh)"
+fi
 
 # Machine-specific overrides (not tracked by this repository).
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"

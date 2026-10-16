@@ -33,3 +33,9 @@ fi
 if command -v fd >/dev/null 2>&1; then
     alias find='fd'
 fi
+
+# cat replacement
+if command -v bat >/dev/null 2>&1; then
+    alias cat='bat --style=plain --paging=never'
+    alias catp='bat'
+fi

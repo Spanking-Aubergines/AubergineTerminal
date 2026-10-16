@@ -253,9 +253,9 @@ if [[ -n "$STOW_PACKAGE" ]]; then
         fi
 
         if [[ "$APPLY_STOW" == true ]]; then
-            stow --verbose --dir="$REPO_DIR" --target="$HOME" "$pkg"
+            stow --no-folding --verbose --dir="$REPO_DIR" --target="$HOME" "$pkg"
         else
-            stow --no --verbose --dir="$REPO_DIR" --target="$HOME" "$pkg"
+            stow --no-folding --no --verbose --dir="$REPO_DIR" --target="$HOME" "$pkg"
         fi
     done
 

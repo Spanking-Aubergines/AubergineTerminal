@@ -42,6 +42,17 @@ cd ~/.dotfiles
 
 Run `./scripts/install.sh --help` for all flags.
 
+## Interactive menu
+
+For a guided workflow, run:
+
+~~~sh
+./scripts/menu.sh
+~~~
+
+It covers package status, installation, Stow deploy/unstow, login shell,
+Git hooks, and the test suite.
+
 ## Layout
 
 - `scripts/install.sh` — installer (dry-run by default)

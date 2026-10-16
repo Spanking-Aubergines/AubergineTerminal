@@ -80,7 +80,7 @@ function y() {
 
 # >>> Starship theme selector >>>
 function prompt-theme() {
-    local theme_dir="$HOME/.dotfiles/zsh/.config/starship/themes"
+    local theme_dir="${DOTFILES_ZSH_DIR:-$HOME/.dotfiles/zsh}/.config/starship/themes"
     local selection_file="$HOME/.config/starship-theme"
     local theme_file theme
     local -a theme_names

@@ -44,7 +44,7 @@ bindkey '^L' clear-screen
 DOTFILES_ZSH_DIR="${${(%):-%x}:A:h}"
 [[ -f "$DOTFILES_ZSH_DIR/.config/zsh/aliases.zsh" ]]   && source "$DOTFILES_ZSH_DIR/.config/zsh/aliases.zsh"
 [[ -f "$DOTFILES_ZSH_DIR/.config/zsh/functions.zsh" ]] && source "$DOTFILES_ZSH_DIR/.config/zsh/functions.zsh"
-unset DOTFILES_ZSH_DIR
+# Keep DOTFILES_ZSH_DIR available for the persistent theme selector.
 
 # --- Zinit ---------------------------------------------------------------
 ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zinit"
@@ -109,15 +109,16 @@ fi
 
 # Prompt (Starship; loads last so it wins the prompt).
 # >>> Persistent Starship theme >>>
+_starship_theme_dir="$DOTFILES_ZSH_DIR/.config/starship/themes"
 _starship_theme="voight"
 if [[ -r "$HOME/.config/starship-theme" ]]; then
     _saved_theme="$(<"$HOME/.config/starship-theme")"
-    if [[ -n "$_saved_theme" && -r "$HOME/.dotfiles/zsh/.config/starship/themes/$_saved_theme.toml" ]]; then
+    if [[ -n "$_saved_theme" && -r "$_starship_theme_dir/$_saved_theme.toml" ]]; then
         _starship_theme="$_saved_theme"
     fi
 fi
-export STARSHIP_CONFIG="$HOME/.dotfiles/zsh/.config/starship/themes/$_starship_theme.toml"
-unset _starship_theme _saved_theme
+export STARSHIP_CONFIG="$_starship_theme_dir/$_starship_theme.toml"
+unset _starship_theme_dir _starship_theme _saved_theme
 # <<< Persistent Starship theme <<<
 
 eval "$(starship init zsh)"

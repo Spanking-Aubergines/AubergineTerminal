@@ -106,11 +106,31 @@ Or drive it directly:
 
 ### One-shot bootstrap
 
-On a fresh machine, clone and set up in one command:
+On a fresh machine, clone the public repository and run the package check:
 
 ~~~sh
 DOTFILES_REPO_URL=https://github.com/Spanking-Aubergines/AubergineTerminal.git ./scripts/bootstrap.sh
 ~~~
+
+Bootstrap runs the installer in **dry-run mode** by default. It does not
+install packages or deploy configuration links automatically.
+
+After cloning, enter the repository and install missing packages when ready:
+
+~~~sh
+cd ~/.dotfiles
+./scripts/install.sh --install
+~~~
+
+Preview configuration deployment before applying it:
+
+~~~sh
+./scripts/install.sh --stow all
+./scripts/install.sh --stow all --apply
+~~~
+
+The `--apply` command asks for confirmation before creating links. To deploy
+only Zsh configuration, replace `all` with `zsh`.
 
 ## Interactive menu
 

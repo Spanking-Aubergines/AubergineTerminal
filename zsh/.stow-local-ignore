@@ -1,0 +1,2 @@
+# Do not deploy timestamped backup artifacts as configuration.
+(^|/).*\.backup-[0-9]{8}-[0-9]{6}$

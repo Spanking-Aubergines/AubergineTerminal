@@ -21,8 +21,8 @@ setopt INTERACTIVE_COMMENTS
 autoload -Uz compinit
 compinit
 
-# Key bindings (emacs mode; Ctrl+L clears the screen).
-bindkey -e
+# Key bindings (vi mode; Ctrl+L clears the screen).
+bindkey -v
 bindkey '^L' clear-screen
 
 # --- Zinit ---------------------------------------------------------------

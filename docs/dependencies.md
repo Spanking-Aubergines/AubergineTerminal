@@ -52,6 +52,7 @@ deployment. It checks that `/usr/bin/zsh` is executable and listed in
 | zdharma-continuum/fast-syntax-highlighting | Real-time syntax highlighting as you type |
 | zsh-users/zsh-autosuggestions | Fish-style history-based suggestions |
 | zsh-users/zsh-completions | Extra completion definitions |
+| zsh-users/zsh-history-substring-search | Search history by substring with Ctrl+P/Ctrl+N (k/j in vi command mode) |
 
 Zinit itself is cloned on first run of `zsh/.zshrc` into
 `${XDG_DATA_HOME:-$HOME/.local/share}/zinit`. Plugins are loaded in Turbo

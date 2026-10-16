@@ -41,4 +41,10 @@ zinit wait lucid light-mode for \
     atload"_zsh_autosuggest_start" \
         zsh-users/zsh-autosuggestions \
     blockf atpull'zinit creinstall -q .' \
-        zsh-users/zsh-completions
+        zsh-users/zsh-completions \
+    atload'
+        bindkey -M viins "\C-p" history-substring-search-up
+        bindkey -M viins "\C-n" history-substring-search-down
+        bindkey -M vicmd "k" history-substring-search-up
+        bindkey -M vicmd "j" history-substring-search-down
+    ' zsh-users/zsh-history-substring-search

@@ -25,11 +25,11 @@ compinit
 bindkey -v
 bindkey '^L' clear-screen
 
-# Aliases (resolved relative to this .zshrc, so the repo can live anywhere).
+# Sibling files, resolved relative to this .zshrc so the repo can live anywhere.
 DOTFILES_ZSH_DIR="${${(%):-%x}:A:h}"
-[[ -f "$DOTFILES_ZSH_DIR/aliases.zsh" ]] && source "$DOTFILES_ZSH_DIR/aliases.zsh"
+[[ -f "$DOTFILES_ZSH_DIR/aliases.zsh" ]]   && source "$DOTFILES_ZSH_DIR/aliases.zsh"
+[[ -f "$DOTFILES_ZSH_DIR/functions.zsh" ]] && source "$DOTFILES_ZSH_DIR/functions.zsh"
 unset DOTFILES_ZSH_DIR
-[[ -f "${${(%):-%x}:A:h}/functions.zsh" ]] && source "${${(%):-%x}:A:h}/functions.zsh"
 
 # --- Zinit ---------------------------------------------------------------
 ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zinit"

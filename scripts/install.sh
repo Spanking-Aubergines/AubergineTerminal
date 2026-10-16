@@ -160,7 +160,7 @@ if [[ "$SET_SHELL" == true ]]; then
 
     chsh -s "$SHELL_PATH" "$USER"
     printf '\nShell-change command completed. Verify with:\n'
-    printf '  getent passwd "$USER" | cut -d: -f1,7\n'
+    printf "  getent passwd \"\$USER\" | cut -d: -f1,7\n"
     exit 0
 fi
 

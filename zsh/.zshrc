@@ -29,6 +29,7 @@ bindkey '^L' clear-screen
 DOTFILES_ZSH_DIR="${${(%):-%x}:A:h}"
 [[ -f "$DOTFILES_ZSH_DIR/aliases.zsh" ]] && source "$DOTFILES_ZSH_DIR/aliases.zsh"
 unset DOTFILES_ZSH_DIR
+[[ -f "${${(%):-%x}:A:h}/functions.zsh" ]] && source "${${(%):-%x}:A:h}/functions.zsh"
 
 # --- Zinit ---------------------------------------------------------------
 ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zinit"

@@ -277,7 +277,9 @@ declare -a missing=()
 
 while IFS= read -r line || [[ -n "$line" ]]; do
     line="${line%%#*}"
-    line="${line//[[:space:]]/}"
+    # Trim surrounding whitespace without altering package names.
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
     [[ -z "$line" ]] && continue
 
     if [[ ! "$line" =~ ^[a-zA-Z0-9.+:-]+$ ]]; then

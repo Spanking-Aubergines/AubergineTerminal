@@ -31,23 +31,30 @@ chmod +x "$MOCK_BIN/pacman"
 DPKG_LOG="$TEMP_DIR/dpkg-query.log"
 APT_GET_LOG="$TEMP_DIR/apt-get.log"
 TEST_OS_RELEASE="$TEMP_DIR/debian-os-release"
-export DPKG_LOG APT_GET_LOG TEST_OS_RELEASE
+INSTALLED_PACKAGES="$TEMP_DIR/installed-packages"
+export DPKG_LOG APT_GET_LOG TEST_OS_RELEASE INSTALLED_PACKAGES
 
 cat > "$MOCK_BIN/dpkg-query" <<'MOCK'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "$DPKG_LOG"
-# Simulate every package being absent.
-exit 1
+package="${@: -1}"
+
+if grep -Fxq -- "$package" "$INSTALLED_PACKAGES"; then
+    printf 'install ok installed\n'
+else
+    printf 'deinstall ok config-files\n'
+fi
+exit 0
 MOCK
 
 cat > "$MOCK_BIN/apt-get" <<'MOCK'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "$APT_GET_LOG"
-printf 'Unexpected apt-get invocation: %s\n' "$*" >&2
 exit 99
 MOCK
 
 chmod +x "$MOCK_BIN/dpkg-query" "$MOCK_BIN/apt-get"
+
 
 run_test() {
     local description="$1"
@@ -205,13 +212,47 @@ else
     exit 1
 fi
 
-if [[ ! -s "$APT_GET_LOG" ]]; then
-    printf '%s\n' 'PASS: Debian dry run did not invoke apt-get'
-else
-    printf '%s\n' 'FAIL: Debian dry run unexpectedly invoked apt-get'
+if [[ -s "$APT_GET_LOG" ]]; then
+    printf '%s\n' 'FAIL: Dry run invoked apt-get'
     cat "$APT_GET_LOG"
     exit 1
 fi
+printf '%s\n' 'PASS: Dry run did not invoke apt-get'
+
+# Simulate a mix of installed and missing Debian packages.
+printf 'zsh\n' > "$INSTALLED_PACKAGES"
+: > "$DPKG_LOG"
+: > "$APT_GET_LOG"
+
+if output="$(PATH="$MOCK_BIN:$PATH" "$TEST_REPO/scripts/install.sh" 2>&1)"; then
+    actual=0
+else
+    actual=$?
+fi
+
+if [[ "$actual" -ne 0 ]]; then
+    printf '%s\n' 'FAIL: Debian mixed-package dry run'
+    printf '%s\n' "$output"
+    exit 1
+fi
+
+if grep -Fqx '  [installed] zsh' <<< "$output" &&
+   grep -Fqx '  [missing]   git' <<< "$output" &&
+   grep -Fqx '  [missing]   stow' <<< "$output" &&
+   grep -Fqx 'Packages to install: git stow' <<< "$output"; then
+    printf '%s\n' 'PASS: Debian recognises installed and missing packages'
+else
+    printf '%s\n' 'FAIL: Debian package detection output was incorrect'
+    printf '%s\n' "$output"
+    exit 1
+fi
+
+if [[ -s "$APT_GET_LOG" ]]; then
+    printf '%s\n' 'FAIL: apt-get was invoked'
+    cat "$APT_GET_LOG"
+    exit 1
+fi
+printf '%s\n' 'PASS: apt-get was not invoked'
 
 unset DOTFILES_OS_RELEASE_FILE
 

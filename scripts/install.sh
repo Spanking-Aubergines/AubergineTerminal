@@ -238,13 +238,15 @@ if [[ "$APPLY_STOW" == true ]]; then
     exit 2
 fi
 
-if [[ ! -r /etc/os-release ]]; then
+OS_RELEASE_FILE="${DOTFILES_OS_RELEASE_FILE:-/etc/os-release}"
+
+if [[ ! -r "$OS_RELEASE_FILE" ]]; then
     printf 'Error: cannot identify this operating system.\n' >&2
     exit 1
 fi
 
-# shellcheck disable=SC1091
-source /etc/os-release
+# shellcheck disable=SC1090,SC1091
+source "$OS_RELEASE_FILE"
 
 case "${ID:-}" in
     arch)

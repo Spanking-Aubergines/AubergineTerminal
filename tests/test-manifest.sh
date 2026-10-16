@@ -28,6 +28,27 @@ MOCK
 
 chmod +x "$MOCK_BIN/pacman"
 
+DPKG_LOG="$TEMP_DIR/dpkg-query.log"
+APT_GET_LOG="$TEMP_DIR/apt-get.log"
+TEST_OS_RELEASE="$TEMP_DIR/debian-os-release"
+export DPKG_LOG APT_GET_LOG TEST_OS_RELEASE
+
+cat > "$MOCK_BIN/dpkg-query" <<'MOCK'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$DPKG_LOG"
+# Simulate every package being absent.
+exit 1
+MOCK
+
+cat > "$MOCK_BIN/apt-get" <<'MOCK'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$APT_GET_LOG"
+printf 'Unexpected apt-get invocation: %s\n' "$*" >&2
+exit 99
+MOCK
+
+chmod +x "$MOCK_BIN/dpkg-query" "$MOCK_BIN/apt-get"
+
 run_test() {
     local description="$1"
     local expected="$2"
@@ -134,5 +155,64 @@ assert_rejected_before_pacman \
 printf '   \n\n# No packages here\n    \n# Another comment\n' \
     > "$TEST_REPO/packages/arch/required.txt"
 run_test "Reject comments and whitespace only" 1
+
+printf '\n%s\n' '--- Isolated Debian manifest validation ---'
+
+cat > "$TEST_OS_RELEASE" <<'OS_RELEASE'
+ID=debian
+PRETTY_NAME="Debian GNU/Linux Test"
+OS_RELEASE
+
+export DOTFILES_OS_RELEASE_FILE="$TEST_OS_RELEASE"
+
+# Invalid Debian manifests must be rejected before dpkg-query runs.
+: > "$TEST_REPO/packages/debian/required.txt"
+: > "$DPKG_LOG"
+: > "$APT_GET_LOG"
+run_test "Debian rejects empty manifest" 1
+
+if [[ ! -s "$DPKG_LOG" ]]; then
+    printf '%s\n' 'PASS: Empty Debian manifest rejected before package checks'
+else
+    printf '%s\n' 'FAIL: Empty Debian manifest queried dpkg-query'
+    cat "$DPKG_LOG"
+    exit 1
+fi
+
+printf 'zsh\nbad package name\ngit\n' \
+    > "$TEST_REPO/packages/debian/required.txt"
+: > "$DPKG_LOG"
+run_test "Debian rejects invalid package entry" 1
+
+if [[ ! -s "$DPKG_LOG" ]]; then
+    printf '%s\n' 'PASS: Invalid Debian entry rejected before package checks'
+else
+    printf '%s\n' 'FAIL: Invalid Debian entry queried dpkg-query'
+    cat "$DPKG_LOG"
+    exit 1
+fi
+
+# Valid Debian manifests should check packages but never install them.
+printf 'zsh\ngit\nstow\n' > "$TEST_REPO/packages/debian/required.txt"
+: > "$DPKG_LOG"
+: > "$APT_GET_LOG"
+run_test "Debian dry run handles missing packages" 0
+
+if [[ -s "$DPKG_LOG" ]]; then
+    printf '%s\n' 'PASS: Valid Debian manifest reached package checks'
+else
+    printf '%s\n' 'FAIL: Valid Debian manifest did not query dpkg-query'
+    exit 1
+fi
+
+if [[ ! -s "$APT_GET_LOG" ]]; then
+    printf '%s\n' 'PASS: Debian dry run did not invoke apt-get'
+else
+    printf '%s\n' 'FAIL: Debian dry run unexpectedly invoked apt-get'
+    cat "$APT_GET_LOG"
+    exit 1
+fi
+
+unset DOTFILES_OS_RELEASE_FILE
 
 printf '%s\n' 'Manifest tests completed.'

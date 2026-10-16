@@ -53,6 +53,9 @@ deployment. It checks that `/usr/bin/zsh` is executable and listed in
 | zsh-users/zsh-autosuggestions | Fish-style history-based suggestions |
 | zsh-users/zsh-completions | Extra completion definitions |
 | zsh-users/zsh-history-substring-search | Search history by substring with Ctrl+P/Ctrl+N (k/j in vi command mode) |
+| hlissner/zsh-autopair | Auto-close brackets and quotes |
+| MichaelAquilina/zsh-you-should-use | Remind you when an alias exists for a command you typed |
+| Aloxaf/fzf-tab | Use fzf as the tab-completion menu (requires `fzf`) |
 
 Zinit itself is cloned on first run of `zsh/.zshrc` into
 `${XDG_DATA_HOME:-$HOME/.local/share}/zinit`. Plugins are loaded in Turbo

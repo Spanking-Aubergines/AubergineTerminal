@@ -40,11 +40,22 @@ zinit wait lucid light-mode for \
         zdharma-continuum/fast-syntax-highlighting \
     atload"_zsh_autosuggest_start" \
         zsh-users/zsh-autosuggestions \
-    blockf atpull'zinit creinstall -q .' \
-        zsh-users/zsh-completions \
     atload'
         bindkey -M viins "\C-p" history-substring-search-up
         bindkey -M viins "\C-n" history-substring-search-down
         bindkey -M vicmd "k" history-substring-search-up
         bindkey -M vicmd "j" history-substring-search-down
-    ' zsh-users/zsh-history-substring-search
+    ' zsh-users/zsh-history-substring-search \
+    atload'
+        source <(fzf --zsh)
+        export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
+    ' hlissner/zsh-autopair \
+    atload'
+        export YSU_MESSAGE_POSITION="after"
+    ' MichaelAquilina/zsh-you-should-use \
+    blockf atpull'zinit creinstall -q .' \
+        zsh-users/zsh-completions \
+    atload'
+        zstyle ":completion:*" menu no
+        zstyle ":fzf-tab:*" fzf-flags "--height=40%" "--layout=reverse"
+    ' Aloxaf/fzf-tab

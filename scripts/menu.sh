@@ -340,6 +340,7 @@ show_menu() {
         "Install Git hooks"
         "Run all tests"
         "Show installer help"
+        "Starship Themes            Preview and apply themes"
     )
 
     printf '\n%sACTIONS%s  %s↑/↓ navigate · Enter select · number + Enter shortcut%s\n' \
@@ -406,12 +407,12 @@ read_menu_choice() {
                 IFS= read -r -s -n 2 -t 1 sequence || true
                 case "$sequence" in
                     '[A')
-                        selected=$(((selected + 11) % 12))
+                        selected=$(((selected + 12) % 13))
                         digits=""
                         redraw_menu
                         ;;
                     '[B')
-                        selected=$(((selected + 1) % 12))
+                        selected=$(((selected + 1) % 13))
                         digits=""
                         redraw_menu
                         ;;
@@ -487,6 +488,7 @@ while true; do
         10) run_action "$HOOKS" ;;
         11) run_action "$TESTS" ;;
         12) run_action "$INSTALL" --help ;;
+        13) "$REPO_DIR/scripts/starship-themes.sh" menu ;;
         s|S) continue ;;
         0|q|Q) printf '\nBye.\n'; exit 0 ;;
         *) printf '\n%sUnknown choice:%s %s\n' "$C_YELLOW" "$C_RESET" "$choice"; pause ;;

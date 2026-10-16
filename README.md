@@ -63,6 +63,8 @@ Install the repo's Git hooks once after cloning:
 
 The pre-commit hook runs `./tests/run-all.sh` before each commit.
 
+See `docs/testing.md` for test layout and conventions.
+
 ## Safety
 
 - Dry-run is the default.

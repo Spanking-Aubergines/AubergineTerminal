@@ -62,4 +62,9 @@ run_test "Reject invalid package entry" 1
 printf 'zsh\ngit\nstow\n' > "$TEST_REPO/packages/arch/required.txt"
 run_test "Dry run handles missing packages without installing" 0
 
+# Leading/trailing whitespace, blank lines, and comments are allowed.
+printf '  zsh  \n\n# A comment\ngit # inline comment\n  stow\n' \
+    > "$TEST_REPO/packages/arch/required.txt"
+run_test "Accept whitespace, blank lines, and comments" 0
+
 printf '%s\n' 'Manifest tests completed.'

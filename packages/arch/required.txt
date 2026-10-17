@@ -19,3 +19,4 @@ lazygit
 lazydocker
 git-delta
 tldr
+ttf-space-mono-nerd

@@ -39,11 +39,15 @@ generated from the set of packages already installed on a machine.
 Prompt and TUI tools (Oh My Posh, yazi, eza, btop) use Nerd Font glyphs. A
 patched font must be installed for those glyphs to render correctly.
 
-- Arch Linux: `ttf-jetbrains-mono-nerd` (in `packages/arch/required.txt`).
-- Debian: the Nerd Font patched build is not packaged. Install it manually
+The kitty configuration expects `SpaceMono Nerd Font`.
+
+- Arch Linux:
+  - `ttf-space-mono-nerd` (active font)
+  - `ttf-jetbrains-mono-nerd` (fallback)
+  Both are in `packages/arch/required.txt`.
+- Debian: the Nerd Font patched builds are not packaged. Install manually
   from <https://www.nerdfonts.com/fonts> into `~/.local/share/fonts/`, then
-  run `fc-cache -fv`. The kitty configuration expects
-  `JetBrainsMono Nerd Font`.
+  run `fc-cache -fv`.
 
 ## Oh My Posh (prompt)
 
